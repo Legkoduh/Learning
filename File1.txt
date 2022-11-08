@@ -1,3 +1,7 @@
+<<<<<<< HEAD
 Line added on web github during file creation. git
+Resolving the conflict in the same line on a local and remote repositories
+Line added on web github during file creation. github
+>>>>>>> d343a27cad49715ad28fba19a0ea60de4a93db74
 New line in new branch in local repo
 New line in main branch in local repo for conflict 1
