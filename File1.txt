@@ -1,3 +1,3 @@
-Line added on web github during file creation
+Line added on web github during file creation. git
 New line in new branch in local repo
 New line in main branch in local repo for conflict 1
