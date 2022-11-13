@@ -153,9 +153,9 @@ git add (name of the file with manual fix)
 git commit -am "Message"
 git push
 
-git GUI
+------------------------- git GUI -------------------------
 git GUI & - launch git GUI
-gitk & - the history of all action with the repository	
+gitk & - the history of all action with the repository (Visualize master's history)
 
 Use case:
 Загрузить репозиторий на локальную машину - git clone (url of the repository)
