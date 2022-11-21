@@ -1,0 +1,40 @@
+Chrles Proxy - прокси сервер, между клиентом и сервером
+Клиент отправляет запрос на прокси, а затем он поступает на сервер
+С помощью Charles можно изучать запросы, видоизменять их (для тестирования поведения системы при возникновении различных ошибок), получить информацию про API, если нет документации
+Сниффинг - процесс мониторинга и перехвата всех пакетов, которые проходят через сеть, с помощью снифферов (Charles, Fiddler)
+
+Для корректной работы с HTTPS протоколом, необходимо установить SSL-сертификат
+Ресурсы которые используют HTTPS протоколы взаимодействия в сети, используют этот сертификат
+HELP > SSL Proxying > Instal Charles Root Certificate
+Установить сертификат
+Текущий пользователь
+ПОместить все сертификаты в следующее хранилище > Обзор > Доверенные корневые центры сертификации
+
+Для выделения нужного ресурса, из списка всех запросов:
+Клик по нему правой кнопкой мыши > Focus
+
+Что бы запросы на ресурс корректно отображались (вместо unknown), нужно включить SSL проксирование:
+Курсор на нужный ресурс > клик на правую кнопку мыши > Enable SSL Proxying
+
+Узнать IP Address:
+Help > Local IP Address
+cmd > ipconfig > IPv4 address
+
+Charles можно использовать с эмуляторами (Android Studio) и с мобильными устройствами
+Для мобильных устройств:
+Settings >  WiFi > Select active wifi network > Settings
+Proxy server - Manual
+Proxy server Host name - current IP Address
+Proxy server Port: 8888
+Click Save button
+После подключения мобильного устройства, эмулятора к Charles, он покажет информационное сообщение
+
+Для работы Charles с мобильными устройствами, на них необходимо установить SSL сертификат:
+1.) Скачать:
+https://www.youtube.com/redirect?event=video_description&redir_token=QUFFLUhqbVkxMDNVMUpfbExFRzEzMkh4LVUwYW1HUjQ3UXxBQ3Jtc0tsY3d4WnFYbnpscHlHUFBzWjhPQnFIQVhVYXpjZXBVb21GaUloYXJhRDRFX29hUllOaHhvdzhsSjNDM0taR2dlcFNhOXBVMUNaclR3cDhZS0plQUdKNmpHUHRpMWk4aEhoY2swVDg2Ukt5X0pRamN2VQ&q=http%3A%2F%2Fwww.charlesproxy.com%2Fgetssl%2F&v=_qKigDAFbP4
+2.) Изменить расширение файла на .cer
+3.) Отправить его на мобильный девайс
+4.) Установить через Установщик сертификатов > Дать название > Выбрать VPN и приложения
+
+Включить прокси для всех ресурсов:
+Proxy > SSL Proxying Settings... > SSL Proxying tab > Click Add > in appeared pop-up - Host: * > OK > OK
