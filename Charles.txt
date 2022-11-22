@@ -10,8 +10,10 @@ HELP > SSL Proxying > Instal Charles Root Certificate
 Текущий пользователь
 ПОместить все сертификаты в следующее хранилище > Обзор > Доверенные корневые центры сертификации
 
-Для выделения нужного ресурса, из списка всех запросов:
+Для выделения нужного ресурса, из списка всех запросов, в табе Structure:
 Клик по нему правой кнопкой мыши > Focus
+В табе Sequence отображается последовательный список всех запросов и ответов
+Что бы в Sequence отображались данные только выбранных ресурсов, нужно активировать чекбокс Focused
 
 Что бы запросы на ресурс корректно отображались (вместо unknown), нужно включить SSL проксирование:
 Курсор на нужный ресурс > клик на правую кнопку мыши > Enable SSL Proxying
@@ -38,3 +40,54 @@ https://www.youtube.com/redirect?event=video_description&redir_token=QUFFLUhqbVk
 
 Включить прокси для всех ресурсов:
 Proxy > SSL Proxying Settings... > SSL Proxying tab > Click Add > in appeared pop-up - Host: * > OK > OK
+
+--------------------- Переадресация хостов в Charles ---------------------
+Tools > Map Remote... > activate the Enable Map Remote checkbox > click the Add button
+Insert the link into the "Host:" input field and click Tab button on the keyboard to fill all the necessary fields automatically
+
+--------------------- Подмена данных в запросе и ответе (Rewrite) ---------------------
+Tools > Rewrite... > activate the Enable Rewrite checkbox > click Add button >
+In the "Location" block > click Add button > fill the URL that you need
+In the block below > click Add button > add data to rewrite the original one
+Select the Type that you need
+In the "Match" block
+Fill in the "Value" input field with the link for the resource that you want to rewrite (can be the same as in the "Location" block)
+If the "Value" field will be empty so the rewrite will be applied for all resources
+In the "Replace" block
+Fill in the "Value" input field with the data that you want to change the original one
+
+--------------------- Изменение статус кодов ---------------------
+Tools > Rewrite... > activate the Enable Rewrite checkbox > click Add button
+In the "Location" block > click Add button > вставьте ссылку на ресурс, где нужно произвести замену
+В блоке ниже > click Add button > click on the "Type" drop-down list > select "Response Status"
+In the "Match" block
+В поле ввода "Value" ввести статус код, который нужно заменить (например 200 ОК)
+В поле ввода "Replace" ввести код, на который нужно заменить
+
+--------------------- Эмуляция 403 ошибки или обрыва связи (Доступ запрещен) ---------------------
+Block List применяет выбранное действие для ресурсов указанных в нем
+Tools > Block List... > активировать Enable Block List чекбокс > выбрать нужный пунк в дроп-даун Blocking actions > клик на кнопку Add > вставить нужную ссылку
+Allow List - применяет выбранное действие ко всем ресурсам, кроме указанных в нем
+Tools > Allow List... > активировать Enable Block List чекбокс > выбрать нужный пунк в дроп-даун Blocking actions > клик на кнопку Add > вставить нужную ссылку
+Символ звездочки (*) в поле Path - применяет правило ко всем путям указаного домена
+
+--------------------- Подмена ответа сервера ---------------------
+1st way:
+Tools > Map Local... > activate Enable Map Local checkbox > click Add button
+In the Map From block - fill in the Host field with URl you need
+In the Map To block - select the file that will replace the Response body
+2nd way:
+Tools > Rewrite... > activate the Enable Rewrite checkbox > click Add button
+In the Location block > click the Add button > fill in the Host input field with the link that you need
+In the block below > click the Add button > select "Body" in the "Type" drop-down list > in the Where block > activate the Response checkbox
+In the  Match block > insert the data that you need to change in the Value field
+In the Replace block > insert the data that you need to appear in the Response body in the Value field (check Case sensitive, Regex, Match whole value parameters)
+
+--------------------- Изменение скорости работы интеренета ---------------------
+Proxy > Throttle Settings... > activate Enable Throttling checkbox > can be applied for all or only for selected hosts
+
+--------------------- Перехват, изменение и отправка запросов/ответов (Breakpoint) ---------------------
+Во время прерывания, добавленого в Breakpoint List, запроса/ответа его можно изменять, а затем выполнять (он не выполниться без "отмашки")
+Proxy > Breakpoint Settings... > activate Enable Breakpoints > click the Add button
+Select Method, Host, and activate the Request or Response checkbox
+После выполнения указаного в Breakpoint List запроса/ответа, происходит разрыв/пауза, во время которой можно изменить запрос или ответ
