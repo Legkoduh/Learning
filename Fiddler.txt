@@ -1,0 +1,36 @@
+По умолчанию будут перехватываються только http запросы
+--------------------- Для отслеживания https запросов необходимо установить SSL сертификат ---------------------
+Fiddler Classic:
+Tools > Options > in the appeared Options window > HTTPS tab > click Actions button > Trust root certificate >
+The Fiddler root certificate will be installed automatically > click OK button
+Fiddler Everywhere:
+View > Preferences > in appeared Settings window > HTTPS tab > click the Trust root certificate button (certificate will be installed automatically) >
+activate the Capture HTTPS traffic checkbox > click Save button
+
+--------------------- Fiddler for mobile devices (Android and only for web apps, not for mobile applications) ---------------------
+Изменить настройки сети (wifi) для подключения к Fiddler Proxy:
+Выбрать активное подключение > Свойства сети > Прокси > Вручную > Имя хоста - IP адрес по которому доступен Charles; Порт - 8888 - Fiddler Classic, 8866 - Fiddler Everywhere > Save
+Перейти по ссылке http://ipv4.fiddler:8888/ - для Fiddler Classic или http://ipv4.fiddler:8866/ - для Fiddler Everywhere
+Настройки (на мобильном девайсе) > Шифрование и учетные данные > Установка сертификатов > Сертификат центра сертификации > Выбрать загруженный сертификат
+
+Fiddler Classic:
+Tools > Options > Connections tab > activate the Allow remote computers to connect checkbox
+Documentation:
+https://docs.telerik.com/fiddler/configure-fiddler/tasks/configureforandroid
+https://docs.telerik.com/fiddler/configure-fiddler/tasks/configureforios
+
+Fiddler Everywhere:
+View > Preferences > Connections tab > activate the Allow remote computers to connect checkbox
+Documentation:
+https://docs.telerik.com/fiddler-everywhere/traffic/configure-android
+https://docs.telerik.com/fiddler-everywhere/traffic/configure-ios
+
+--------------------- Узнать IP адресс ---------------------
+Fiddler Classic - mouse hover over the "Online" button in the right corner of the header
+Fiddler Everywhere - mouse hover over the "Connected" button in the right corner of the footer
+
+Ctrl + X - clear the requests list
+Capturing button (in the left corner of the footer) - start/stop proxying
+
+If after closing the Fiddler program the internet connection is absent:
+Open cmd > fill in inetcpl.cpl > in the appeared Properties: Internet window > Connections tab > Internet Settings > deactivate the "Use a proxy-server for the local connections" checkbox
