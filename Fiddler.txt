@@ -1,5 +1,6 @@
-По умолчанию будут перехватываються только http запросы
---------------------- Для отслеживания https запросов необходимо установить SSL сертификат ---------------------
+По умолчанию будут перехватываються только http запросы, для отслеживания https запросов необходимо установить SSL сертификат
+
+--------------------- Установка SSL сертификата на десктоп (Windows) ---------------------
 Fiddler Classic:
 Tools > Options > in the appeared Options window > HTTPS tab > click Actions button > Trust root certificate >
 The Fiddler root certificate will be installed automatically > click OK button
@@ -7,7 +8,7 @@ Fiddler Everywhere:
 View > Preferences > in appeared Settings window > HTTPS tab > click the Trust root certificate button (certificate will be installed automatically) >
 activate the Capture HTTPS traffic checkbox > click Save button
 
---------------------- Fiddler for mobile devices (Android and only for web apps, not for mobile applications) ---------------------
+--------------------- Установка SSL сертификата на мобильный девайс (Android и только браузер, не апп) ---------------------
 Изменить настройки сети (wifi) для подключения к Fiddler Proxy:
 Выбрать активное подключение > Свойства сети > Прокси > Вручную > Имя хоста - IP адрес по которому доступен Charles; Порт - 8888 - Fiddler Classic, 8866 - Fiddler Everywhere > Save
 Перейти по ссылке http://ipv4.fiddler:8888/ - для Fiddler Classic или http://ipv4.fiddler:8866/ - для Fiddler Everywhere
@@ -24,6 +25,24 @@ View > Preferences > Connections tab > activate the Allow remote computers to co
 Documentation:
 https://docs.telerik.com/fiddler-everywhere/traffic/configure-android
 https://docs.telerik.com/fiddler-everywhere/traffic/configure-ios
+
+--------------------- Change the request ---------------------
+Fiddler Everywhere:
+Select the request that you want to change > click Add New Rule button in the context menu >
+select the necessary option in the drop-down list > click Save button
+
+Fiddler Classic:
+Select the request that you want to change > Go to the AutoResponder tab > activate the Enable rules checkbox > 
+Rule Editor block > select the necessary option in the drop-down list of the 2nd input field > click Save button
+Documentation
+https://docs.telerik.com/fiddler/knowledge-base/autoresponder
+
+После изменений в запросе/ответе, этот запрос можно выполнить и проверить прямо в Fiddler Classic/Everywhere, в Composer
+The list of all kinds of the Rules are in the original documentation
+https://docs.telerik.com/fiddler-everywhere/user-guide/rules
+
+--------------------- Breakpoint in the Fiddler Classic ---------------------
+Rules > Automatic Breakpoints > After response or Before request > Execute the request > click Run to Completion button
 
 --------------------- Узнать IP адресс ---------------------
 Fiddler Classic - mouse hover over the "Online" button in the right corner of the header
