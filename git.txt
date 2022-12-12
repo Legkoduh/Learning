@@ -124,6 +124,9 @@ git push -u origin second_name - создаем эту ветку с новым 
 fatal: The current branch Check2 has no upstream branch.
 To push the current branch and set the remote as upstream, use git push --set-upstream origin Check2 (or git push -u origin Check2)
 Upstream branch - это локальная ветка, ветка слежения, которая на прямую связана с удаленной
+При клонировании репозитория, как правило, автоматически создаётся ветка master, которая следит за origin/master
+При создании новой локальной ветки, upstream ветка не создается автоматически и ее нужно создавать самомо ?
+При клонировании репозитория, автоматически создаются локальные upstream ветки для всех веток в репозитории ?
 
 Удаление локальной ветки:
 git branch -d second_name
