@@ -120,6 +120,10 @@ git push origin :first_name - удаляем старую ветку
 // - [deleted]         firstname_changed
 git push -u origin second_name - создаем эту ветку с новым названием (second_name)
 Названия ветки во время переименования и пуша должны совпадать
+Если не указать -u, то не будет создана upstream ветка и при попытке пуша - возникает ошибка
+fatal: The current branch Check2 has no upstream branch.
+To push the current branch and set the remote as upstream, use git push --set-upstream origin Check2 (or git push -u origin Check2)
+Upstream branch - это локальная ветка, ветка слежения, которая на прямую связана с удаленной
 
 Удаление локальной ветки:
 git branch -d second_name
