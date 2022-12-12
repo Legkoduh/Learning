@@ -52,11 +52,26 @@ test3@gmail.com,123456789
 
 --------------------- Тестирование WSDL и XML в Postman ---------------------
 Метод запроса - POST (test URL - http://webservices.oorsprong.org/websamples.countryinfo/CountryInfoService.wso?WSDL)
-Body > raw > XML
+Body > raw > XML > вставляем необходимые данные
 Headers > add Content-Type - text/xml
 
 Для просмотра всех доступных методов в WSDL-файле, можно установить расширение для Chrome - Wizdler
 Выбираем нужный метод из списка, копируем необходимые данные, модифицируем их, если нужно, и вставляем в Body запроса
+
+--------------------- Захват HTTP запросов в Postman ---------------------
+1.) Capture requests (in the footer) > Via Proxy tab > Enable Proxy > select options that you need > click Start Capture button
+2.) Windows search > enter Proxy > Изменение параметров прокси-сервера вручную > Настройка прокси вручную > включить тоглер Использовать прокси сервер > 
+Address: http://localhost, Port: 5555 > Click Save button
+All requests will be saved in Collection that you selected in the Capture requests window or in the History tab (in the left column)
+Что бы загрузить ресурсы использующие HTTPS - необходимо отключить Прокси-сервер в настройках Windows
+
+--------------------- Перехват HTTP, HTTPS запросов в Postman (используя Chrome расширение) ---------------------
+Для перехватки HTTPS запросов в Postman необходимо установить расширение для браузера - Interceptor
+1.) Download, instal and launch an Interceptor extension for the browser (example for Google Chrome)
+https://chrome.google.com/webstore/detail/postman-interceptor/aicmkgpgakddgnaphhhpliifpcfhicfo?hl=ru
+2.) Capture requests (in the footer) > Via Interceptor tab > click Install Interceptor Brige button > after success, select options that you need > click Start Capture button
+Requests are available in Postman and Interceptor browser extension
+When the job is done - switch toggler to OFF position in Postman Interceptor extension
 
 Example of API documentation and test service for API tests
 https://reqres.in/
