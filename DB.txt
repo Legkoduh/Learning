@@ -1,0 +1,66 @@
+Типы данных
+INT (integer) - целые числа
+DEC (decimal) - десятичные числа
+FLOAT, DOUBLE - данные с плавающей точкой
+CHAR, VARCHAR (1-256 символов) - строки, текст
+BLOB, TEXT, MEMO - большой обьем текстовой информации
+DATE, TIME, YEAR - форматы даты
+BOOLEAN - true, false
+NULL (NOT NULL) - пустые значение (не 0, а ничего)
+TIMESTAMP - 4-байтное целое число, равное количеству секунд прошедших с полуночи 1 января 1970 года по усредненному времени Гринвича (т.е. нулевой часовой пояс, точка отсчета часовых поясов
+Позволяет узнать когда был создан элемент в базе данных
+TIMESTAMP зависит от часового пояса, в котором вы находитесь
+Для разных часовых поясов, в разных базах данных, он может отличаться
+
+В SQL все команды должны заканчиваться точкой с запятой
+Строки заключаються в двойные кавычки
+
+Работа с базами данных
+show databases; - показать список баз данных
+create database (db_name); - создать базу данных с названием (name)
+create database students;
+drop database (db_name); - удалить базу данных
+drop database test;
+
+Что бы начать работу с БД, необходимо перейти в нее, что б СУБД понимала, с какой именно мы хотим работать
+use (db_name); - перейти в базу данных с названием (name)
+use students;
+
+После перехода в нужную БД, можно просмотреть список всех таблиц, которые содержаться в ней
+show tables; - показать список таблиц в БД
+
+Работа с таблицами
+CREATE TABLE, имя таблицы, ее описание - создание таблицы
+CREATE TABLE (table_name) (table info);
+CREATE TABLE courses
+(id INT(11) NOT NULL PRIMARY KEY,
+faculty VARCHAR(55) NULL,
+number INT(2) NULL);
+
+drop table (table_name); - удалить таблицу
+drop table courses2;
+
+DESC (table_name); - показать информацию о таблице
+desc courses;
+
+INSERT INTO (table_name) VALUES (values); - добавление новой записи (строки) в таблицу
+INSERT INTO courses VALUES (1, "bio", 1);
+
+DELETE FROM (table_name) WHERE (field_name) = (value);
+DELETE FROM courses WHERE ID > 5
+DELETE FROM courses - удалить все записи (строки) из таблицы courses
+
+UPDATE (table_name) SET (values) - обновить уже существующую запись (строку) новыми значениями
+UPDATE courses SET faculty = "prog" WHERE faculty = "gum";
+
+ALTER TABLE (table_name) DROP COLUMN (column_name) - удалить столбец
+ALTER TABLE courses DROP COLUMN id;
+
+ALTER TABLE (table_name) ADD COLUMN (field_name/column_name) (data_type) AFTER (field_name/column_name);
+Вместо AFTER (field_name/column_name) можно использовать ключевые слова FIRST, SECOND, ..., если поле должно быть 1-ым, 2-ым, и т.д. (SECOND works ?)
+ALTER TABLE courses ADD COLUMN id INT NOT NULL AFTER faculty;
+ALTER TABLE courses ADD COLUMN id INT FIRST;
+
+AUTO_INCREMENT - увеличивает значение на 1 при добавлении новой записи в таблицу
+AUTO_INCREMENT доступен только для поля обозначеного как PRIMARY KEY (первичный ключ)
+ALTER TABLE courses ADD COLUMN autoplus INT PRIMARY KEY AUTO_INCREMENT NOT NULL AFTER number;
