@@ -64,3 +64,146 @@ ALTER TABLE courses ADD COLUMN id INT FIRST;
 AUTO_INCREMENT - увеличивает значение на 1 при добавлении новой записи в таблицу
 AUTO_INCREMENT доступен только для поля обозначеного как PRIMARY KEY (первичный ключ)
 ALTER TABLE courses ADD COLUMN autoplus INT PRIMARY KEY AUTO_INCREMENT NOT NULL AFTER number;
+
+Заполнить поле без указания всех данных
+Ячейки которые не имеют значения по умолчанию (NOT NULL) - обязательны для заполнения
+INSERT INTP cars2 (id, year, torque) VALUES(3, 2020, "780");
+
+Запросы с SELECT
+SELECT * FROM (table_name); - вывести все данные из таблицы
+SELECT * FROM courses;
+
+DISTINCT -  вывести записи без дубликатов
+SELECT DISTINCT (field_name) FROM (table_name);
+SELECT DISTINCT number FROM courses;
+
+LIMIT - вывести n-количество записей начиная с 1-ой
+SELECT * FROM (table_name) LIMIT (n-value);
+SELECT * FROM courses LIMIT 3;
+
+AS (aliases) - временное название поля в результирующей таблице (не изменяет название в исходной таблице)
+SELECT (field_name) AS (new_field_name) FROM (table_name);
+SELECT id, make, model, year AS prod_year, power FROM cars2;
+
+WHERE - сравнение
+SELECT (field_name) FROM (table_name) WHERE (condition);
+SELECT * FROM cars2 WHERE id>3;
+
+AND - логический оператор, сравнивает с несколькими условиями и возвращает записи, которые удовлетворяют их все сразу
+OR - логический оператор, сравнивает с первым условием и если оно ложно, затем со вторым и возвращает записи, которые удовлетворяют 1 из условий
+SELECT * FROM cars2 WHERE id>=3 AND make = "Audi"; - выведит только те записи, которые удовлетворяют сразу 2-м условиям
+SELECT * FROM cars2 WHERE id=3 OR id>4; - выведит записи, которые удовлетворяют 1-ое условие, а так же записи, которые подподают под 2-е условие
+В качестве аналогов AND и OR можно использовать символы && и ||
+SELECT * FROM cars2 WHERE ID>=3 && make = "Audi";
+SELECT * FROM cars2 WHERE ID=3 || ID>4;
+
+LIKE - поиск похожих значений
+SELECT (field_name) FROM (table_name) WHERE (field_name) LIKE (condition)
+"%(condition)"; - если значение заканчиваеться на (condition) и нас не интересует количество символов до него
+"(condition)%"; - если значение начинаеться на (condition) и нас не интересует количество символов после него
+"__(condition)"; - значение заканчиваеться на (condition) и перед ним 2 символа (_ - означает 1 символ)
+"(condition)__"; - значение начинаеться на (condition) и после него 2 символа
+SELECT * FROM cars2 WHERE make LIKE "__d%"; (Audi)
+
+BETWEEN - диапазон
+SELECT * FROM (table_name) WHERE id between (start_of_diapason) AND (end_of_diapason);
+SELECT * FROM cars2 WHERE id between 2 AND 3; (id=2, id=3)
+
+NOT (field_name) BETWEEN - не в диапазон
+NOT должен быть указан после WHERE, до названия поля, диапазон которого используеться
+SELECT (field_name) FROM (table_name) WHERE NOT (field_name) BETWEEN (start_of_diapason) AND (end_of_diapason);
+SELECT * FROM cars WHERE NOT id BETWEEN 2 AND 3; (id=1, id=4)
+NOT можно использовать и с другими операторами
+SELECT make FROM cars2 WHERE NOT make="Audi"; (all makes except Audi)
+
+IN (value, value, ...) - точное совпадение с конкретными, указанными числами
+SELECT (field_name) FROM (table_name) WHERE (field_name) IN (value, value, value, ...);
+SELECT * FROM cars2 WHERE id IN (1, 3); (id=1, id=3)
+SELECT model FROM cars2 WHERE make IN ("Mercedes", "BMW");
+
+Логические операторы можно обьединять
+SELECT (filed_name) FROM (table_name) WHERE (field_name > value OR field_name < value) AND (field_name)=(value);
+SELECT * FROM courses WHERE (faculty = "math" OR faculty = "chem") AND number BETWEEN 2 and 5; (chem - 2, math - 3 => only math)
+
+ORDER BY (field_name) ASC/DESC - сортировка по полю (field_name) в алфавитном, порядке возрастания (ASC или можно не указывать) и в обратном порядке (DESC)
+SELECT * FROM (table_name) ORDER BY (field_name); - сортировка по алфавиту, в порядке возрастания
+SELECT * FROM (table_name) ORDER BY (field_name) DESC; - сортировка в порядке обратном алфавитному, убывания
+
+Агрегатные функции:
+SUM(field_name)
+MIN(field_name)
+MAX(field_name)
+AVG(field_name)
+COUNT(field_name) - количество записей в поле, не учитывает пустые и NULL значения (можно использовать для строчных значений)
+SELECT AVG(field_name) FROM (table_name);
+SELECT COUNT(faculty) FROM courses; (quantity of rows in the faculty column)
+SELECT SUM(number), COUNT(faculty) FROM courses; (15, 5)
+SELECT MAX(number) AS Maximum, MIN(autoplus) AS Minimum FROM courses; (5, 1)
+
+IS - оператор для проверки ячейки на наличие в ней значения
+IS NULL - возвращает true, если значение в ячейке - NULL
+IS NULL - returns false, for the cell that have any value or empty
+SELECT (field_name) FROM (table_name) WHERE (field_name) IS null;
+SELECT * FROM cars2 WHERE power IS null; (вернет все записи, где значение в ячейке power - null)
+SELECT make FROM cars2 WHERE NOT power IS null; (вернет все пустые записи, а также записи со значениями, которые не равны null)
+
+JOIN запросы
+TABLE A (left) TABLE B (right)
+JOIN - запросы, которые позволяют обьеденять несколько таблиц по 1 полю, одинаковому для них
+Существует видов JOIN-ов:
+INNER JOIN
+LEFT JOIN
+RIGHT JOIN
+
+INNER JOIN (JOIN, внутренне обьединение) - только совпадения в 2-х таблицах
+Выводит записи, которые совпадают по ключу в таблице A (левой) и таблице B (правой)
+SELECT (tableA.fieldname), (tableB.field_name) FROM (tableA) JOIN (tableB) ON (tableA.field_name) = (tableB.field_name);
+SELECT cars2.make, sales.sold FROM cars2 JOIN sales ON cars2.make=sales.make;
+
+FULL OUTER JOIN (FULL JOIN) - все варианты, все записи
+Выводит записи, которые совпадают по ключу, а так же все остальные записи из таблицы А и таблицы B
+MySQL has no FULL OUTER JOIN
+It can be emulated by using UNION with 2 SELECT queries:
+1 LEFT JOIN and RIGHT JOIN where tableA.key IS null (left table)
+2 RIGHT JOIN and LEFT JOIN where tableB.key IS null (right table)
+select customers.id, customers.fname, discount.value, discount.start_date from customers left join discount ON customers.id = discount.id union
+select customers.id, customers.fname, discount.value, discount.start_date from customers right join discount ON customers.id=discount.id WHERE
+customers.id IS null;
+
+В запросах, где отсекаються совпадения в соединяемых таблицах, ключ одной из таблиц приравниваеться к NULL (WHERE tableA.key IS null)
+Поэтому при проверке совпадают ли ключи - один указанный ключ всегда NULL, а второй - имеет значение как в таблице
+Такие ключи не совпадают и эти значения отсекаються
+
+FULL OUTER JOIN с NULL - все кроме совпадений
+Выводит все записи из таблица А и таблицы В, кроме записей, которые совпадают по ключу
+Can be emulated with UNION, the selected fields (in the result table) must be the same in 2 SELECT queries
+SELECT customers.id, customers.fname, discount.value from customers
+right join discount ON customers.id=discount.id where customers.id is null
+union select customers.id, customers.fname, discount.value from customers
+left join discount ON customers.id=discount.id where discount.id is null;
+
+LEFT JOIN (левостороннее обьединение) - выводит все записи из таблицы А (левой) и совпадающие записи из таблицы B (правой)
+Возвращает все строки из таблицы А, даже если их нет в B. Значения которых нет - заменяються на NULL
+
+LEFT JOIN с NULL - только записи слева, без совпадений
+Выводит только записи из таблицы А (слева). Не выводит совпадения и записи из таблицы В (справа)
+В условии ключ правой таблицы должен приравниваться к NULL (ON tableA.key = tableB.key WHERE tableB.key IS null)
+
+RIGHT JOIN (правостороннее обьединение) - выводит все записи из таблицы B (правой) и совпадающие записи из таблицы А (левой)
+Возвращает все строки из таблицы B, даже если их нет в A. Значения которых нет - заменяються на NULL
+
+RIGHT JOIN с NULL - только записи справа, без совпадений
+Выводит только записи, из таблицы B (справа). Не выводит совпадения и записи из таблицы A (слева)
+В условии ключ левой таблицы должен приравниваться к NULL (ON tableA.key = tableB.key WHERE tableA.key IS null)
+
+Если 1 из ключей указан как NULL - совпадения не выводяться
+SELECT (tableA.field_name), (tableB.field_name) FROM (tableA) FULL OUTER JOIN (tableB) ON (tableA.key)=(tableB.key) WHERE (tableB.key) IS null OR (tableA.key) IS null;
+Выведет записи из таблицы A и таблицы B, но не покажет совпадения по ключу (tableA.key)=(tableB.key)
+
+Результаты LEFT JOIN и RIGHT JOIN зависят от того, в каком порядке указаны таблицы в самом запросе
+Первая таблица будет считаться левой (А), а вторая - правой (B)
+
+Вложенные подзапросы
+Если с помощью одного SELECT-запроса невозможно вывести нужные значение, то внутри него можно использовать еще 1 SELECT
+Вложенный запрос указываеться в круглых скобках
+SELECT id, fname, lname, age FROM general WHERE age IN (SELECT age FROM general WHERE id>3 AND age>21);
