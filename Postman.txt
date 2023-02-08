@@ -73,6 +73,9 @@ https://chrome.google.com/webstore/detail/postman-interceptor/aicmkgpgakddgnaphh
 Requests are available in Postman and Interceptor browser extension
 When the job is done - switch toggler to OFF position in Postman Interceptor extension
 
+--------------------- API ---------------------
+API (Application Programming Interface) - разновидность интерфейса, предназначенного для взаимодействия между программами
+
 Example of API documentation and test service for API tests
 https://reqres.in/
 

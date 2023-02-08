@@ -46,9 +46,24 @@ desc courses;
 INSERT INTO (table_name) VALUES (values); - добавление новой записи (строки) в таблицу
 INSERT INTO courses VALUES (1, "bio", 1);
 
+DELETE - оператор для удаления строк/записей в таблице
 DELETE FROM (table_name) WHERE (field_name) = (value);
 DELETE FROM courses WHERE ID > 5
 DELETE FROM courses - удалить все записи (строки) из таблицы courses
+
+TRUNCATE - операция мгновенного удаления всех строк в таблице
+TRUNCATE TABLE (table_name);
+TRUNCATE TABLE Cars2;
+TRUNCATE Cars2;
+Логически схожа с операцией DELETE без оператора WHERE, но в ситуациях на практике имеет отличия
+Основные отличия операторов TRUNCATE и DELETE, которые могут присутствовать в различных реализациях СУБД:
+Операция TRUNCATE не записывает в журнал событий удаление отдельных строк. Вследствие чего не может активировать триггеры.
+После операции TRUNCATE для некоторых СУБД (например, Oracle) следует неявная операция COMMIT. Поэтому удаленные в таблице записи нельзя восстановить операцией ROLLBACK. Но существуют и СУБД, в которых операция TRUNCATE может участвовать в транзакциях, например, PostgreSQL и Microsoft SQL Server.
+Операция DELETE блокирует каждую строку, а TRUNCATE — всю таблицу.
+Операция TRUNCATE не возвращает какого-то осмысленного значения (обычно возвращает 0) в отличие от DELETE, которая возвращает число удаленных строк.
+Операция TRUNCATE в некоторых СУБД (например, MySQL или Microsoft SQL Server), сбрасывает значение счетчиков (для полей с AUTOINCREMENT / IDENTITY). В PostgreSQL для сброса счётчиков необходимо указывать модификатор RESTART IDENTITY.
+Операция TRUNCATE в некоторых СУБД (например, MySQL, PostgreSQL или Microsoft SQL Server) запрещена для таблиц, содержащих внешние ключи других таблиц. В PostgreSQL существует, однако, модификатор CASCADE, который разрешает TRUNCATE в этой ситуации — данные из зависимых таблиц удаляются в той же транзакции.
+В SQLite операция как таковая отсутствует, но есть оптимизация операции DELETE, которая «значительно ускоряет её работу, если отсутствует аргумент WHERE».
 
 UPDATE (table_name) SET (values) - обновить уже существующую запись (строку) новыми значениями
 UPDATE courses SET faculty = "prog" WHERE faculty = "gum";
@@ -59,7 +74,10 @@ ALTER TABLE courses DROP COLUMN id;
 ALTER TABLE (table_name) ADD COLUMN (field_name/column_name) (data_type) AFTER (field_name/column_name);
 Вместо AFTER (field_name/column_name) можно использовать ключевые слова FIRST, SECOND, ..., если поле должно быть 1-ым, 2-ым, и т.д. (SECOND works ?)
 ALTER TABLE courses ADD COLUMN id INT NOT NULL AFTER faculty;
-ALTER TABLE courses ADD COLUMN id INT FIRST;
+ALTER TABLE courses ADD id INT FIRST; (can be userd without COLUMN word)
+
+How to delete values in a cell ?
+Delete not set to null - UPDATE (table_name) SET (field_name) = null WHERE (condition);
 
 AUTO_INCREMENT - увеличивает значение на 1 при добавлении новой записи в таблицу
 AUTO_INCREMENT доступен только для поля обозначеного как PRIMARY KEY (первичный ключ)
@@ -104,6 +122,13 @@ SELECT (field_name) FROM (table_name) WHERE (field_name) LIKE (condition)
 "__(condition)"; - значение заканчиваеться на (condition) и перед ним 2 символа (_ - означает 1 символ)
 "(condition)__"; - значение начинаеться на (condition) и после него 2 символа
 SELECT * FROM cars2 WHERE make LIKE "__d%"; (Audi)
+SELECT * FROM cars2 WHERE make NOT LIKE "a%"; - все записи, где 1-я буква в поле make не а
+Select all records where the first letter of the City is an "a" or a "c" or an "s"
+SELECT * FROM Customers WHERE City LIKE "[acs]%";
+Select all records where the first letter of the City starts with anything from an "a" to an "f".
+SELECT * FROM Customers WHERE City LIKE "[a-f]%";
+Select all records where the first letter of the City is NOT an "a" or a "c" or an "f".
+SELECT * FROM Customers WHERE City LIKE "[^acf]%";
 
 BETWEEN - диапазон
 SELECT * FROM (table_name) WHERE id between (start_of_diapason) AND (end_of_diapason);
@@ -121,6 +146,13 @@ SELECT (field_name) FROM (table_name) WHERE (field_name) IN (value, value, value
 SELECT * FROM cars2 WHERE id IN (1, 3); (id=1, id=3)
 SELECT model FROM cars2 WHERE make IN ("Mercedes", "BMW");
 
+GROUP BY
+List the number of customers in each country.
+SELECT COUNT(Customers.id), Country FROM Customers GROUP BY Country;
+SELECT COUNT(id), gender FROM General GROUP BY gender;
+List the number of customers in each country, ordered by the country with the most customers first.
+SELECT COUNT (CustomerID), Country FROM Customers GROUP BY Country ORDER BY COUNT(CustomerID) DESC;
+
 Логические операторы можно обьединять
 SELECT (filed_name) FROM (table_name) WHERE (field_name > value OR field_name < value) AND (field_name)=(value);
 SELECT * FROM courses WHERE (faculty = "math" OR faculty = "chem") AND number BETWEEN 2 and 5; (chem - 2, math - 3 => only math)
@@ -128,6 +160,8 @@ SELECT * FROM courses WHERE (faculty = "math" OR faculty = "chem") AND number BE
 ORDER BY (field_name) ASC/DESC - сортировка по полю (field_name) в алфавитном, порядке возрастания (ASC или можно не указывать) и в обратном порядке (DESC)
 SELECT * FROM (table_name) ORDER BY (field_name); - сортировка по алфавиту, в порядке возрастания
 SELECT * FROM (table_name) ORDER BY (field_name) DESC; - сортировка в порядке обратном алфавитному, убывания
+Также сортировать можно по нескольким колонкам/полям сразу, порядок соответствует очередности полей в запросе
+SELECT make, model FROM cars2 ORDER BY make, model; (но будет ли разница от таблицы с сортировкой тольк по make ?)
 
 Агрегатные функции:
 SUM(field_name)
@@ -139,6 +173,7 @@ SELECT AVG(field_name) FROM (table_name);
 SELECT COUNT(faculty) FROM courses; (quantity of rows in the faculty column)
 SELECT SUM(number), COUNT(faculty) FROM courses; (15, 5)
 SELECT MAX(number) AS Maximum, MIN(autoplus) AS Minimum FROM courses; (5, 1)
+SELECT COUNT(*)  FROM cars2 WHERE year = 2020; //equal to - SELECT COUNT(year) FROM cars2 WHERE year = 2020;
 
 IS - оператор для проверки ячейки на наличие в ней значения
 IS NULL - возвращает true, если значение в ячейке - NULL
