@@ -1,2 +1,9 @@
+<<<<<<< HEAD
 Line 1
 Line 2 (local)
+=======
+Line 1 (remote)
+Line 2
+>>>>>>> 4757a5cdfe21b82f72c0ff21153d3c994ca149c9
+
+Conflict in different/separate lines of the same file cannot be resolved by git itself
