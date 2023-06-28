@@ -1,0 +1,32 @@
+cURL - программа, утилита, которая позволяет делать сетевые запросы по различным протоколам данных (HTTP, FTP, SCP...)
+Для HTTP запросов можно использовать браузер, для FTP - FTP-программу, а cURL - универсальная программа, которая может отправлять запросы и получать ответы по разным протоколам
+cURL не имеет графического интерфейса
+Работать с ней можно из командной строки или установив модуль к языку программирования, с помощью функций которого можно взаимодействать с ней
+
+Синтаксис:
+curl (URL) https://www.google.com.ua/
+
+По умолчанию, cURL использует метод запросов GET
+Изменить его можно с помощью оператора -X (Method value) (URL): curl -X POST https://reqres.in/api/login/ --data "email=eve.holt@reqres.in" --data "password=cityslicka"
+
+Передавать данные можно при помощи оператора --data или -d:
+curl -X POST https://reqres.in/api/users/ --data "name=Morpheus" --data "job=Leader"
+curl -X POST https://reqres.in/api/users -d "name=Neo" -d "job:Chosen"
+
+Передавать headers можно при помощи оператора -H: -H "location: uk"
+
+Разрешить редиректы можно при помощи оператор -L: curl -L https://br.motorsport.com/
+Без него редирект не сработает и будет возвращена ошибка 301 Moved Permanently
+
+Дополнительную информацию (Headers) можно получить при помощи оператора --verbose: curl -L https://br.motorsport.com/ --verbose
+
+Только заголовки можно получить при помощи оператора --head: curl --head https://www.motorsport.com/
+
+Скопировать cURL можно из Network табы в DevTools браузера, а так же в Code Snipets табе Postman выбрав cURL тип в дроп-даун списке
+Такой cURL может содержать дополнительную информацию (хедеры, информацию), а не только URL
+
+ping - скорость реагирования сервера на запрос который приходит от другого компьютера/клиета
+Синтаксис: ping tsn.ua
+
+To write the response data to a file use a command -output (-o, --output, -O) and (file address and file name) - -o D:\out.txt
+curl -o D:\out.txt http://api-s-v1.motorsport.com/promotion/find/ -v \    -H "accept: application/json, text/plain, */*" \    -H "content-type: application/json" \    -H "accept-encoding: gzip" \    -H "authorization: Basic bTB0MDA3Om0wdDAwNw==" \    -H "location: mst" \    -d "{\"widget_id\":934,\"count_items\":15,\"sections\":[\"home\"],\"race_type_edition_alias\":\"\"}" \

@@ -147,11 +147,27 @@ SELECT * FROM cars2 WHERE id IN (1, 3); (id=1, id=3)
 SELECT model FROM cars2 WHERE make IN ("Mercedes", "BMW");
 
 GROUP BY
+Оператор GROUP BY определяет, как строки будут группироваться, группирует строки в группы
+Если в выражении SELECT производится выборка по одному или нескольким столбцам и также используются агрегатные функции, то необходимо использовать выражение GROUP BY
+SELECT Manufacturer, COUNT(*) AS ModelsCount FROM Products; - не работает
+SELECT Manufacturer, COUNT(*) AS ModelsCount FROM Products GROUP BY Manufacturer; - ок
+Любой столбец, который используется в выражении SELECT (не считая столбцов, которые хранят результат агрегатных функций), должны быть указаны после оператора GROUP BY.
+Так, например, столбец Manufacturer и Price указанны и в выражении SELECT, и в выражении GROUP BY.
+SELECT Manufacturer, count(Models), Price FROM Products GROUP BY Manufacturer; - не работает, так как Price не указан в операторе GROUP BY;
+SELECT Manufacturer, count(Models), Price FROM Products GROUP BY Manufacturer, Price; - ок
+Следует учитывать, что выражение GROUP BY должно идти после выражения WHERE, но до выражения ORDER BY:
 List the number of customers in each country.
 SELECT COUNT(Customers.id), Country FROM Customers GROUP BY Country;
 SELECT COUNT(id), gender FROM General GROUP BY gender;
 List the number of customers in each country, ordered by the country with the most customers first.
 SELECT COUNT (CustomerID), Country FROM Customers GROUP BY Country ORDER BY COUNT(CustomerID) DESC;
+
+HAVING
+Оператор HAVING используется для фильтрации групп (а оператор WHERE - для фильтрации строк)
+Оператор HAVING определяет, какие группы будут включены в выходной результат, то есть выполняет фильтрацию групп.
+Если при этом необходимо провести сортировку, то выражение ORDER BY идет после выражения HAVING.
+SELECT Manufacturer, Price, COUNT(Models) FROM Products GROUP BY Manufacturer, Price HAVING Price>1050 ORDER BY Price desc;
+SELECT Manufacturer AS Make, COUNT(Models) AS Quantity FROM Products GROUP BY Make HAVING Quantity>1 ORDER BY Manufacturer;
 
 Логические операторы можно обьединять
 SELECT (filed_name) FROM (table_name) WHERE (field_name > value OR field_name < value) AND (field_name)=(value);
