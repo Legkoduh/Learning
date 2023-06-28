@@ -173,4 +173,4 @@ Use case:
 Загрузить репозиторий на локальную машину - git clone (url of the repository)
 Добавить все изменения в VCS - git add (name of the file with extension)
 Сохранить все измнения - git commit -m 'Message about sense of the commit'
-Отправить изменения с локальной машины в удаленный репозиторий - git push (and then - pass the verification with valid data)
+Отправить изменения с локальной машины в удаленный репозиторий - git push (and then - pass the verification with valid data) 
