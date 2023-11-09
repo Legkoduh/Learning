@@ -140,6 +140,7 @@ git fetch origin second_name (без :)
 //branch 'second_name' set up to track 'origin/second_name'.
 Удаление ветки с удаленного репозитория
 git push origin :second_name (branch name)
+git push -u origin :second_name (branch name) ???
 Удалить файл из ветки: (сначала локальной, а затем используя commit и push - удаленной)
 1.) При помощи команды git rm
 git rm ConflictFile.txt (file name) - данная команда сама запустит git add (файл должен быть в удаленном и локальном репозиториях)
