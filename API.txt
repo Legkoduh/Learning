@@ -1,0 +1,36 @@
+Client > URL > DNS
+DNS > IP > Client
+Client > IP > Web server/resource
+
+Microservices
+Monolit:
+E-commerce shop > 1 server contains: Search, Payments, Review and Ratings
+
+Microservices:
+E-commerce shop > 1 server contains: Search,
+2-nd server contains: Review
+3-rd server: Review and Ratings
+3 servers взаємодіють між собою
+Search, Payments, Review and Ratings кожен окремо можна масштабувати
+
+Requests Types:
+GET - get some data from the server
+Data in the url
+
+POST - send some data, create (can be tested with GET request after, for used data)
+Data in the body (raw, JSON/XML)
+Every POST - creates a new field
+
+PUT (similar to POST) - update or create a resourse (can be tested with GET request after, for used data)
+Can be used multiple times, creates only 1 field ?
+201 - created
+
+PATCH - edit, partial modification of the resourse (can be tested with GET request after, check the data is updated)
+POST - creates a new user, PATCH - edit Name, Surname, ...
+
+DELETE - delete something from DB (can be tested with GET request after, check the data is not available)
+
+POSTMAN
+Add Environment variable:
+var jsonData = pm.response.json();
+postman.setEnvironmentVariabe("name", jsonData.token.accessToken);
