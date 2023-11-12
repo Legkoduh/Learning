@@ -257,4 +257,4 @@ SELECT (tableA.field_name), (tableB.field_name) FROM (tableA) FULL OUTER JOIN (t
 Вложенные подзапросы
 Если с помощью одного SELECT-запроса невозможно вывести нужные значение, то внутри него можно использовать еще 1 SELECT
 Вложенный запрос указываеться в круглых скобках
-SELECT id, fname, lname, age FROM general WHERE age IN (SELECT age FROM general WHERE id>3 AND age>21);
+SELECT id, fname, lname, age FROM general WHERE age IN (SELECT age FROM general WHERE id>3 AND age>21);Hi
