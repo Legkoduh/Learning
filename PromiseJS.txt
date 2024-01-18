@@ -1,0 +1,640 @@
+Объект Promise используется для отложенных и асинхронных вычислений.
+const promise1 = new Promise((resolve, reject) => {
+let a = 9
+console.log('1')
+  setTimeout(() => {
+      if (a%2===0) {
+          console.log('if')
+    	  resolve('foo');}
+      else {
+          console.log('else')
+          reject(a)}
+  }, 300);
+    console.log('2')
+return 'Hi'; //*
+});
+
+promise1
+    .then((value) => {
+        console.log('The value is even', value)
+  	console.log(3);
+     })
+    .catch(error=>{
+        console.log(4)
+        console.log('The value is odd', error)
+     })
+
+Синтаксис
+new Promise(executor);
+new Promise(function(resolve, reject) { ... });
+executor - объект функции с двумя аргументами resolve и reject.
+Функция executor получает оба аргумента и выполняется сразу, ещё до того как конструктор вернёт созданный объект.
+Первый аргумент (resolve) вызывает успешное исполнение промиса, второй (reject) отклоняет его.
+Обычно функция executor описывает выполнение какой-то асинхронной работы, по завершении которой необходимо вызвать функцию resolve или reject.
+Обратите внимание, что возвращаемое значение функции executor игнорируется.*
+
+Методы:
+Promise.all(iterable)
+Ожидает исполнения всех промисов или отклонения любого из них.
+Возвращает промис, который исполнится после исполнения всех промисов в iterable.
+В случае, если любой из промисов будет отклонён, Promise.all будет также отклонён.
+Promise.all([Promise.resolve('3'), Promise.resolve('9')]).then(el=>console.log(el)).catch(err=>console.log(err)) //['3', '9']
+Promise.all([Promise.resolve('3'), Promise.reject('9')]).then(el=>console.log(el)).catch(err=>console.log(err)) //9
+Promise.all([Promise.reject('3'), Promise.reject('9')]).then(el=>console.log(el)).catch(err=>console.log(err)) //3
+
+Promise.any
+Возвращает промис, который исполнится после исполнения всех промисов в iterable, содержащий результат первого исполненного промиса
+Promise.any([Promise.resolve('3'), Promise.resolve('9')]).then(el=>console.log(el)).catch(err=>console.log(err)) //3
+Promise.any([Promise.reject('3'), Promise.resolve('9')]).then(el=>console.log(el)).catch(err=>console.log(err)) //9
+Promise.any([Promise.reject('3'), Promise.reject('9')]).then(el=>console.log(el)).catch(err=>console.log(err)) //AggregateError: All promises were rejected
+
+Promise.allSettled(iterable)
+Ожидает завершения всех полученных промисов (как исполнения так и отклонения).
+Возвращает промис, который исполняется когда все полученные промисы завершены (исполнены или отклонены), содержащий массив результатов исполнения полученных промисов.
+Promise.allSettled([Promise.resolve('3'), Promise.resolve('9')]).then(el=>console.log(el)).catch(err=>console.log(err)) //[0:{status: 'fulfilled', value: '3'} 1:{status: 'fulfilled', value'9'} length:2]
+Promise.allSettled([Promise.resolve('3'), Promise.reject('9')]).then(el=>console.log(el)).catch(err=>console.log(err)) //[0:{status: 'fulfilled', value: '3'} 1:{status: 'rejected', reason: '9'} length:2]
+
+Promise.race(iterable)
+Ожидает исполнения или отклонения любого из полученных промисов.
+Возвращает промис, который будет исполнен или отклонён с результатом исполнения первого исполненного или отклонённого промиса из iterable.
+Promise.race([Promise.resolve('3'), Promise.resolve(9)]).then(el=>console.log('then', el)).catch(err=>console.log('catch', err)) //then 3
+Promise.race([Promise.reject('3'), Promise.reject(9)]).then(el=>console.log('then', el)).catch(err=>console.log('catch', err)) //catch 3
+
+Promise.reject(reason)
+Возвращает промис, отклонённый из-за reason.
+
+Promise.resolve(value)
+Возвращает промис, исполненный с результатом value.
+
+Метод then содержить 2 функции: 1-я для обработки результата, 2-я для ошибки
+Но для обработки ошибок используют метод catch
+Promise.resolve(3).then((el=>el), (err=>'Error ' + 3)) //3
+Promise.reject(3).then((el=>el), (err=>'Error ' + 3)) //'Hi 3'
+
+catch method returns a Promise, so you can use then method for it
+Not catch, because such promise returns some value not an error
+Promise.reject(1).catch(val=>{console.log('catch1', val); return val}).then(el=>console.log('then after catch', el)) //catch 1, then after catch 1
+Promise.reject(1).catch(val=>{console.log('catch1', val); return val}).catch(el=>console.log('then after catch', el)) //catch 1
+
+Присвоение переменной значения результата Промиса
+Синтаксис then, catch:
+let pr = new Promise((resolve, reject)=>{
+    let random = 1
+    setTimeout(()=>{
+        if (random>0) { resolve('plus') }
+        else { reject('minus') }
+    }, 1000)
+})
+Таким образом в переменную будет присвоен Промис
+let result = pr.then(res=>res).catch(err=>err)
+console.log(result) //Promise {<fulfilled>: 'plus'}
+Рабочий вариант:
+let result;
+let error;
+pr.then(res=>result=res).catch(err=>error=err)
+console.log(result) //undefined
+//1000 milliseconds later
+console.log(result) //plus
+Значение в переменную будет записано только после исполнения Промиса, через некоторое время (в примере 1000 мс).
+Сколько времени необходимо будет в реальных примерах- неизвестно
+До этого времени (исполнения Промиса) значение переменной будет undefined
+Что бы этого избежать, все необходимые действия с такой переменной нужно выполнять внутри метода then
+let result;
+let error;
+pr.then(res=>{
+result=res
+console.log('result value is', result)
+//... some actions with 'result' variable ...
+})
+.catch(err=>{
+error=err
+console.log('error value is ', error)
+//... some actions with 'error' variable ...
+})
+
+Синтаксис async, await
+async function check() {
+    let res1 = await fetch('https://jsonplaceholder.typicode.com/todos/1')
+    let res2 = await res.json()
+    return res2.title
+}
+Асинхронные функции возвращают Промис, которые и будет записан в переменную
+let result = check() //Promise {<fulfilled>: {…}}
+Значение результата Промиса можно присвоить переменной используя слово await
+let result = await check() //{userId: 1, id: 1, title: 'delectus aut autem', completed: false}
+Но так как await доступно только в async функциях, это необходимо сделать внутри нее
+let temp = async () =>{
+    result = await check()
+}
+И вызвать такую функцию
+До console.log(result) //udefined
+temp()
+После console.log(result) //delectus aut autem
+Так как для присвоения значения результата Промиса, такую асинхронную функцию необходимо вызывать каждый раз, ее можно заменить на ананимную самовызывающуюся, которая срабатывает в месте ее обявления
+До console.log(result) //udefined
+(async function () {
+result = await check()
+})()
+После console.log(result) //delectus aut autem
+(async () => {
+result = await check()
+})()
+Или не анонимную
+(async function temp() {
+let res1 = await fetch();
+let res2 = await res1.json();
+result = await res2.title;
+})()
+Или записать в такую самовызывающуюся функцию не вызов другой функции (check), а саму эту функцию, ее код, если он не громоздкий
+(async () => {
+let res1 = await fetch();
+let res2 = await res1.json();
+result = await res2.title;
+})()
+console.log(result) //delectus aut autem
+Плохой пример, функция обьявлена и вызвана внутри самовызывающейся асинхронной фукнции
+(async ()=> {
+    result=await async function temp () {
+    let res = await fetch('https://jsonplaceholder.typicode.com/todos/1')
+    let res2 = await res.json()
+    return await res2.title
+    }()
+})()
+
+Для этого синтаксиса также свойственна проблема, что переменная будет проинициализирована значением результата Промиса, только после его исполнения, спустя какое-то время
+Поэтому все действия с такой переменной необходимо выполнять внутри самовызывающейся асинхронной функции
+
+Проинициализировать внешнюю переменную значением результата Промиса и затем сразу же ее использовать, за пределами Промиса - невозможно.
+Значение еще не будет получено и записано в нее
+Единственный вариант - инициализировать внешнюю переменную и работать с ней - внутри then метода, async функции
+Но в таком случае можно создать внутренюю переменную вместо внешней
+
+The source - https://habr.com/ru/companies/otus/articles/686670/
+Интерпретатор JavaScript всегда сначала выполняет синхронный код, а затем асинхронный.
+Блоки синхронного кода всегда выполняются последовательно сверху вниз.
+Когда мы вызываем new Promise(callback), функция коллбэка будет выполнена сразу же так как она является синхронной
+executor - синхронная коллбэк функция
+console.log('start');
+const promise1 = new Promise((resolve, reject) => {
+  console.log(1)
+})
+console.log('end');
+//start, 1, end
+
+Колбэк функции в then и catch являются асинхронными
+console.log('start');
+const promise1 = new Promise((resolve, reject) => {
+  console.log(1)
+  resolve(2)
+})
+
+promise1.then(res => {
+  console.log(res)
+})
+
+console.log('end');
+//start, 1, end, 2
+
+Метод resolve не прерывает выполнение функции. Код, стоящий за ним, по-прежнему будет выполняться.
+console.log('start');
+const promise1 = new Promise((resolve, reject) => {
+  console.log(1)
+  resolve(2)
+  console.log(3)
+})
+
+promise1.then(res => {
+  console.log(res)
+})
+
+console.log('end');
+//start, 1, 3, end, 2
+
+Метод resolve никогда не вызывался, поэтому promise1 всегда находится в состоянии ожидания (pending).
+Так что promise1.then(…) никогда не выполнялся. 2 не выводится в консоли.
+Вызов метода resolve - исполняет Промис успешно. Для того, что бы получить результат успешно исполненого Промиса используется метод then
+Но если resolve метод не обьявлен - Промис никогда не исполнится успешно и метод then не будет выполнятся
+Метод then вызывается только тогда, когда Промис исполняется успешно, метод catch - когда Промис исполнился с ошибкой
+console.log('start');
+
+const promise1 = new Promise((resolve, reject) => {
+  console.log(1)
+})
+
+promise1.then(res => {
+  console.log(2)
+})
+
+console.log('end');
+//start, 1, end
+
+Промис в функции начнет исполняться только после запуска самой функции
+В этом отличе от присвоения Промиса переменной, где он исполняется сразу же
+console.log('start')
+
+const fn = () => (new Promise((resolve, reject) => {
+  console.log(1);
+  resolve('success')
+}))
+
+console.log('middle')
+
+//then асинхронный код, а вызов функции (fn) - синхронный
+//После middle выводится 1, а не end, потому что запускается функция fn, вывод 1 в консоль является ее частью
+fn().then(res => {
+  console.log(res)
+})
+
+console.log('end')
+//start, middle, 1, end, success
+
+Это подтверждается, если разделить вызов функции fn и метода then и поместить между ними синхронный код
+console.log('start')
+
+const fn = () => (new Promise((resolve, reject) => {
+  console.log(1);
+  resolve('success')
+}))
+
+console.log('middle')
+
+let fnres = fn()
+
+console.log('border')
+
+fnres.then(res => {
+  console.log(res)
+})
+
+console.log('end')
+//start, middle, 1, border, end success
+
+Задачи с более высоким приоритетом называются микрозадачами. Например: Promise, ObjectObserver, MutationObserver, process.nextTick, async/await.
+Задачи с более низким приоритетом называются макрозадачами. Например: setTimeout, setInterval и XHR.
+setTimeout и Promise.resolve() выполняются одновременно, и даже код setTimeout еще впереди, но из-за низкого приоритета относящаяся к нему коллбэк-функция выполняется позже.
+console.log('start')
+
+setTimeout(() => {
+  console.log('setTimeout')
+})
+
+Promise.resolve().then(() => {
+  console.log('resolve')
+})
+
+console.log('end')
+//start, end, resolve, setTimeout
+
+Нам просто нужно выполнить эти три шага:
+Найти синхронный код. //1, 2, 4 (executor - синхронная колбэк функция)
+Найти асинхронный код: (setTimeout, then)
+	Найти код микрозадачи (then)
+	Найти код макрозадачи (setTimeout)
+1, 2, 4
+При переходе к микрозадаче, поскольку текущий Promise все еще находится в состоянии ожидания (pending), код в данный момент выполняться не будет.
+Переходим к макрозадаче
+1, 2, 4, timerStart, timerEnd
+Возвращаемся к микроазадаче
+1, 2, 4, timerStart, timerEnd, success
+const promise = new Promise((resolve, reject) => {
+  console.log(1);
+  setTimeout(() => {
+    console.log("timerStart");
+    resolve("success");
+    console.log("timerEnd");
+  }, 0);
+  console.log(2);
+});
+
+promise.then((res) => {
+  console.log(res);
+});
+
+console.log(4);
+//1, 2, 4, timerStart, timerEnd, success
+
+Правильная последовательность выполнения микро и макрозадач
+1.) Сначала выполняются все микрозадачи.
+2.) Выполняется одна макрозадача.
+3.) Повторно выполняются все (вновь добавленные) микрозадачи.
+4.) Выполняется следующая макрозадача.
+5.) Цикл повторяется / Цикл завершается
+
+const timer1 = setTimeout(() => {
+  console.log('timer1');
+  
+  const promise1 = Promise.resolve().then(() => {
+    console.log('promise1')
+  })
+}, 0)
+
+const timer2 = setTimeout(() => {
+  console.log('timer2')
+}, 0)
+//timer1, promise1, timer2
+ИМХО:
+Поскольку оба setTimeout являются макрозадачами, выполняться они будут в той очередности, в которой обьявлены
+Первым будет выполнен timer1
+Сначала в консоль будет выведено timer1 потому что это синхронный код, а зачем асинхронный - promise1
+После чего выполнится timer2
+Если timer1 timer2 поменять местами, эта логика сохранится и первым будет выполнен setTimeout обьявленый раньше
+const timer2 = setTimeout(() => {
+  console.log('timer2')
+}, 0)
+
+const timer1 = setTimeout(() => {
+  console.log('timer1');
+  
+  const promise1 = Promise.resolve().then(() => {
+    console.log('promise1')
+  })
+}, 0)
+//timer2, timer1, promise1
+
+Если в макрозадаче определена микрозадача, она все равно остается макрозадачей
+Поэтому будет выведено не timer1, promise1, timer2, а timer1, timer2, promise1, так как setTimeout с микрозадачей внутри - является макрозадачей
+const timer1 = setTimeout(() => {
+  console.log('timer1');
+    
+  setTimeout(()=>{
+      const promise1 = Promise.resolve().then(() => {
+        console.log('promise1')
+  	})
+  }, 0)
+}, 0)
+
+const timer2 = setTimeout(() => {
+  console.log('timer2')
+})
+//timer1, timer2, promise1
+
+console.log('start');
+
+const promise1 = Promise.resolve().then(() => {
+  console.log('promise1');
+  const timer2 = setTimeout(() => {
+    console.log('timer2')
+  }, 0)
+});
+
+const timer1 = setTimeout(() => {
+  console.log('timer1')
+  const promise2 = Promise.resolve().then(() => {
+    console.log('promise2')
+  })
+}, 0)
+
+console.log('end');
+//start, end, promise1, timer1, promise2, timer2
+
+console.log('start');
+
+const promise1 = Promise.resolve().then(() => {
+  console.log('promise1');
+  const timer2 = setTimeout(() => {
+    console.log('timer2')
+  }, 0)
+});
+
+const timer1 = setTimeout(() => {
+  console.log('timer1')
+  const promise2 = Promise.resolve().then(() => {
+    console.log('promise2')
+  })
+}, 0)
+
+const timer3 = setTimeout(() => {
+  console.log('timer3')
+  const promise3 = Promise.resolve().then(() => {
+    console.log('promise3')
+  })
+}, 0)
+
+console.log('end');
+//start, end, promise1, timer1, promise2, timer3, promise3, timer2
+
+console.log('start');
+
+const promise1 = Promise.resolve().then(() => {
+  console.log('promise1');
+  const timer2 = setTimeout(() => {
+    console.log('timer2')
+  }, 0)
+});
+
+const timer1 = setTimeout(() => {
+  console.log('timer1')
+  const promise2 = Promise.resolve().then(() => {
+    console.log('promise2')
+  })
+}, 0)
+
+const timer4 = setTimeout(() => {
+  console.log('timer4')
+}, 0)
+
+const timer3 = setTimeout(() => {
+  console.log('timer3')
+  const promise3 = Promise.resolve().then(() => {
+    console.log('promise3')
+  })
+}, 0)
+
+console.log('end');
+//start, end, promise1, timer1, promise2, timer4, timer3, promise3, timer2
+
+console.log('start');
+
+const promise1 = Promise.resolve().then(() => {
+  console.log('promise1');
+  
+  const timer2 = setTimeout(() => {
+    console.log('timer2')
+  }, 0)
+});
+
+const timer1 = setTimeout(() => {
+  console.log('timer1')
+  
+  const promise2 = Promise.resolve().then(() => {
+    console.log('promise2')
+  })
+}, 0)
+
+const timer4 = setTimeout(() => {
+  console.log('timer4')
+}, 0)
+
+const timer3 = setTimeout(() => {
+  console.log('timer3')
+  
+  const promise3 = Promise.resolve().then(() => {
+    console.log('promise3')
+  })
+}, 0)
+
+const promise4 = Promise.resolve().then(() => {
+  console.log('promise4');
+  
+  const timer5 = setTimeout(() => {
+    console.log('timer5')
+  }, 0)
+});
+
+console.log('end');
+//start, end, promise1, promise4, timer1, promise2, timer4, timer3, promise3, timer2, timer5
+timer2 выводится раньше timer5 потому что он раньше стал в очередь
+
+ИМХО:
+Сначала выполняется синхронный код
+Затем первая микрозадача
+Если в микрозадаче есть ожидания, проверяется их приоритет.
+Если находится микрозадача - она выполняется (вне зависимости от порядка ее расположения, она может быть между макрозадачами)*
+Если находится макрозадача - код переходит к следующей асинхронной функции, а эту макрозадачу добавляет в очередь
+Очередь будет вызвана после выполнения всего списка асинхронных функций (последнего ожидания в списке), в очередности их обьявления
+После выполнения всех микрозадач - код переходит к первой макрозадаче (первой в порядке ее расположения, с верху)**
+Если в ней находится микрозадача - она выполняется (вне зависимости от порядка ее расположения, она может быть между макрозадачами)
+Если в ней находится макрозадача - она добавляется в очередь
+После выполнения всех макрозадач - код переходит к выполнению очереди в порядке добавлени (с начала в конец, кто раньше пришел - тот раньше ушел)***
+
+*Микрозадача promise2 найдена между двумя макрозадачами
+const promise1 = Promise.resolve().then(() => {
+  console.log('promise1');
+
+  const timer1 = setTimeout(() => {
+    console.log('timer1')
+  }, 0)
+    
+  const promise2 = new Promise((res, rej) => {
+    res('promise2') })
+    .then(el=>console.log(el))
+
+    const timer2 = setTimeout(() => {
+    console.log('timer2')
+  }, 0)
+});
+
+const timer3 = setTimeout(() => {
+  console.log('timer3');
+  
+  const timer4 = setTimeout(() => {
+    console.log('timer4')
+  }, 0)
+},0)
+//promise1, promise2, timer3, timer1, timer2, timer4
+
+**После выполнения всех микрозадач, макрозадачи начинают выполнятся сверху вниз, в порядке их обьявления
+Поэтому сначала будет выполнен timer1, а не timer2, который обьявлен после promise2
+Затем timer2, а потом очередь - timer3
+const promise1 = Promise.resolve().then(() => {
+  console.log('promise1');
+})
+
+const timer1 = setTimeout(() => {
+  console.log('timer1');
+})
+
+const promise2 = Promise.resolve().then(() => {
+  console.log('promise2');
+    const timer3 = setTimeout(() => {
+    console.log('timer3');
+    })
+});
+
+const timer2 = setTimeout(() => {
+  console.log('timer2');
+})
+//promise1, promise2, timer1, timer2, timer3
+
+***После выполнения микрозадачи promise1, timer1 попадает в очередь
+После выполнения микрозадачи promise2, timer3 попадает в очередь
+После выполнения всех микрозадач, а затем макрозадач - выполняется очередь в порядке добавления в нее элементов (кто раньше пришел - тот раньше ушел): timer1, а потом timer3
+const promise1 = Promise.resolve().then(() => {
+  console.log('promise1');
+    const timer1 = setTimeout(() => {
+    console.log('timer1');
+    })
+});
+
+const timer2 = setTimeout(() => {
+  console.log('timer2');
+})
+
+const promise2 = Promise.resolve().then(() => {
+  console.log('promise2');
+    const timer3 = setTimeout(() => {
+    console.log('timer3');
+    })
+});
+
+const timer4 = setTimeout(() => {
+  console.log('timer4');
+})
+//promise1, promise2, timer2, timer4, timer1, timer3
+
+Пример ожиданий с временем
+const timer1 = setTimeout(() => {
+  console.log('timer1');
+  
+  const timer3 = setTimeout(() => {
+  console.log('timer3')
+  }, 0)
+}, 0)
+
+const timer2 = setTimeout(() => {
+  console.log('timer2')
+    const timer4 = setTimeout(() => {
+  console.log('timer4')
+}, 0)
+}, 0)
+//timer1, timer2, timer3, timer4
+
+timer2 будет выведет первым, потому что этот асинхронный код будет завершен раньше других - через 900 милисекунд
+timer4 будет завершен через 900+90 милисекунд, так как он отложен во времени 2 раза (две SetTimeout функции)
+Сначала он ожидает завершения внешней отсрочки в 900 милисекунд, после чего начинает отсчет внутренняя в 90 милисекунд.
+После ее окончания - он будет выведен
+Затем - timer1, через 1500 милисекунд
+И timer3 через 1610
+const timer1 = setTimeout(() => {
+  console.log('timer1');
+  
+  const timer3 = setTimeout(() => {
+  console.log('timer3')
+}, 1110)
+}, 1500)
+
+const timer2 = setTimeout(() => {
+  console.log('timer2')
+    const timer4 = setTimeout(() => {
+  console.log('timer4')
+}, 90)
+}, 900)
+//timer2, timer4, timer1, timer3
+
+
+Простой пример работы executor в Промисе
+executor содержит синхронные (console.log) и асинхронные действия (resolve, reject как setTimeout)
+function executor () {
+	console.log('executor start');
+	setTimeout(()=>console.log('async'), 1500)
+	console.log('executor end')
+}
+
+function pr(executor) {
+	console.log(1)
+	executor()
+	console.log(2)
+}
+pr(executor) //1, executor start, executor end, 2 async
+
+
+Async/Await
+const show = async () => { return 3 }
+Асинхронная функция всегда возвращает Промис
+В данном примере, неявно (под капотом) был создан обьект класса Промис, с 2 колбэк фукнциями в качестве параметров: resolve, reject и вызвана фукнция resolve с аргументом 3
+Так как асинхронные функции всегда возвращают Промис, с ними можно использовать методы then, catch для обработки результата Промиса
+В асинхронных фукнциях можно ожидать результат другого Промиса с помощью ключевого слова await и таким образом выполнять асинхронные действия
+Await доступен только внутри Async функций
+Await работает как синхронный код и блокирует дальнейшее выполнение кода, пока ожидание не будет завершено с каким либо результатом
+Асинхронная функция ожидает результата await инструкции и блокирует дальнейшее выполнение функции
+Но код, который следует после асинхронной функции не блокируется и может выполняться благодаря асинхронности
