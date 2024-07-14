@@ -1117,3 +1117,73 @@ print(res(3)) # 9
 Лямбда функция может не иметь параметров, тогда после ключевого слова lambda сразу идет двоеточие
 res = lambda: 'Hi'
 print(res()) # Hi
+
+При возникновении ошибки - выполнение кода/программы останавливается
+Что бы этого избежать, ошибку нужно отловить
+Сделать это можно при помощи конструкции try, except
+В блок try - помещают код, при выполнении которого возможно появления ошибок
+В блоке except - указывают конкретный тип ошибки (ее класс) и код, который нужно выполнить при ее появлении
+try:
+    print(10 / 0)
+except ZeroDivisionError:
+    print('Can't devide by zero')
+
+ZeroDivisionError - это класс, ошибка которого возникает при делении чисел на 0
+Сама ошибка является экземпляром этого класса
+try:
+    print(10 / 0)
+except ZeroDivisionError:
+    print(ZeroDivisionError) # class ZeroDivisionError
+    print('Can't devide by zero')
+
+Что бы получить доступ к возникшей ошибке, ее можно записать в переменную при помощи оператора as
+try:
+    print(10 / 0)
+except ZeroDivisionError as error:
+    print(error) # division by zero
+
+Когда функция print получает в качестве аргумента обьекта класса, она выводит его текстовое значение автоматически вызывая встроенный магический метод __str__()
+print(error) # division by zero
+print(error.__str__()) # division by zero
+
+Указывать для каждого типа ошибки блок except - неудобно, поэтому можно использовать родительский класс всех ошибок в Пайтон - класс Exception
+try:
+    print(10 / 0)
+except Exception as error:
+    print(error)
+
+Так же можно вообще не указывать тип ошибки в блоке except, однако так не рекомендуется делать и нет доступа к ошибке, в случае ее возникновения (присвоение переменной при помощи оператор as)
+try:
+    print(10 / 0)
+except:
+    print('Some error happened')
+
+В блок else - помещают код, который будет выполнен только в том случае, если ошибок небыло, даже если они было обработаны в блоке except
+try:
+    print(10 / 0)
+except ZeroDivisionError:
+    print('Can't devide by zero')
+else:
+    print('There were no errors') # Не будет выполнен, так как код в блоке try содержит ошибку
+
+В блок finally - код, который будет выполнен всегда, вне зависимости от того были ошибки или нет
+try:
+    print(10 / 0)
+except ZeroDivisionError:
+    print('Can't devide by zero')
+else:
+    print('There were no errors') # Не будет выполнен, так как код в блоке try содержит ошибку
+finally:
+    print('Finally') # Будет выполнен всегда, когда код в блоке try содержит или не содержит ошибку
+
+Можно самостоятельно создавать и выбрасывать ошибки используя инструкцию raise
+После слова raise нужно указать функцию конструктор того класса ошибка которого нужна
+А в качестве ее аргумента - строку, которая будет показана когда эта ошибка возникнет
+raise ValueError('The value is wrong')
+def divide(a, b):
+    if b == 0:
+    raise ValueError('Can't divide by 0')
+    return a / b
+
+print(divide(10, 0)) # Can't divide by 0
+print(divide(10, 2)) # 5
