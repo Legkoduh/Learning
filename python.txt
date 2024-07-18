@@ -1187,3 +1187,41 @@ def divide(a, b):
 
 print(divide(10, 0)) # Can't divide by 0
 print(divide(10, 2)) # 5
+
+Функция распаковки (unpack) позволяет извлекать значения из последовательностей и присваивать их переменным
+При этом, количество новых переменных должно соответствовать количеству значений в последовательности, иначе будет выброшена ошибка
+list1 = [1, 2, 3]
+first, second, third = list1 - созданы 3 новые переменные и им присвоенны соответствующие порядку, в котором они указаны, значения списка list1
+print(first, second, thirs) # 1, 2, 3
+first, second = list1 # ValueError: too many values to unpack (expected 2)
+
+tuple1 = (1, 'two', 3, True, [1, 2, 3])
+one, two, three, four, five = tuple1
+print(three, four) # 3, True
+
+При использовании распаковки, для одной новой переменной, можно использовать оператор звездочки *, что бы собрать несколько значений в список
+Переменная со звездочкой может быть обьявлена первой, внутри или последней
+tuple2 = (1, 'two', 3, True, [1, 2, 3])
+first, *other, last = tuple2 
+print(first) # 1
+print(other) # [two', 3, True] - список, хотя tuple2 - это кортеж
+print(last) # [1, 2, 3]
+
+list3 = [1, 'two', 3, True, [1, 2, 3]]
+*other, last = list3
+print(other) # [1, two', 3, True]
+print(last) # [1, 2, 3]
+
+При распаковке, оператор звездочки может применятся только к одной новой переменной
+Если таких переменных будет больше - будет выброшена ошибка
+tuple12 = (1, 'two', 3, True, [1, 2, 3])
+*t1, t2, *t3 = tuple12
+print(*t1, t2, *t3) # SyntaxError: multiple starred expressions in assignment
+
+Но переменная со звездочкой не может быть обьявлена одна
+*new_list = list3 # SyntaxError: starred assignment target must be in a list or tuple
+В таком случае можно просто присвоить список list3 новой переменной или использовать один из способов копирования списка
+new_list = list3 - один и тот же обьект
+new_list = list3.copy() - новый обьект
+new_list3 = []
+new_list3.extend(list3) - новый обьект
