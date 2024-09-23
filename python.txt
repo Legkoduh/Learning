@@ -1174,6 +1174,109 @@ print(res(3)) # 9
 res = lambda: 'Hi'
 print(res()) # Hi
 
+Замыкания - это функции, которые запоминают переменные из скоупа, в котором они были созданы (внешняя функция), даже после того как этот скоуп перестал существовать (после окончания работы внешней функиции)
+Это позволяет вложенной функции использовать переменные внешней, даже после того как она завершила исполнение
+def outer_func(x):
+    def inner_func(y):
+        return x + y
+    return inner_func
+
+# Викликаємо outer_func з аргументом 10 і отримуємо функцію
+closure_func = outer_func(10)
+# Тепер можемо викликати замикання, яке запам'ятало значення x = 10
+print(closure_func(5))  # Виведе 15
+print(closure_func(7))  # Виведе 17
+Функція outer_func(x) повертає функцію inner_func(y), яка використовує змінну x із зовнішньої функції.
+Після виклику outer_func(10) ми отримуємо функцію closure_func, яка запам'ятала значення x = 10.
+Коли ми викликаємо closure_func(5), функція додає y = 5 до запам'ятаного x = 10, і результатом буде 15.
+Таким чином, вкладена функція утворює замикання, оскільки вона «замкнула» значення змінної x з зовнішнього простору.
+
+Але, якщо потрібно змінити змінну, яка оголошена у функції outer_func всередині функції inner_func, ви можете використати ключове слово nonlocal
+Воно дозволяє вкладеній функції змінювати змінну з зовнішньої функції, а не створювати нову локальну змінну.
+def outer_func():
+    counter = 0
+    def inner_func():
+        nonlocal counter  # Використовуємо nonlocal, щоб змінити змінну counter
+        counter += 1
+        return counter
+    return inner_func
+
+# Створюємо замикання
+closure_func = outer_func()
+
+print(closure_func())  # Виведе 1
+print(closure_func())  # Виведе 2
+print(closure_func())  # Виведе 3
+Функція outer_func оголошує змінну counter і повертає функцію inner_func.
+Всередині inner_func ми використовуємо nonlocal counter, щоб вказати, що ми хочемо змінити змінну counter з зовнішнього простору видимості.
+Кожного разу, коли ми викликаємо closure_func(), змінна counter збільшується на 1, і цей результат зберігається, оскільки він знаходиться у замиканні.
+Таким чином, nonlocal дозволяє вам змінювати змінну зовнішньої функції у вкладеній функції.
+
+Без використання ключового слова nonlocal, змінювати змінну з зовнішньої функції у Python не можна напряму, оскільки Python автоматично трактує її як локальну змінну всередині вкладеної функції
+Якщо ви спробуєте змінити таку змінну без nonlocal, то отримаєте помилку, тому що Python сприйме, що ви намагаєтеся присвоїти нове значення локальній змінній, яка ще не ініціалізована
+
+Якщо ви не хочете використовувати nonlocal, то є декілька альтернативних варіантів:
+
+1. Використання змінної, що є об'єктом, наприклад списку або словника
+Можна використовувати змінну, яка є змінним об'єктом, таким як список або словник
+Це працюватиме, оскільки змінні об'єкти можна змінювати без використання nonlocal.
+def outer_func():
+    counter = [0]  # Список для збереження значення
+    def inner_func():
+        counter[0] += 1  # Змінюємо перший елемент списку
+        return counter[0]
+    return inner_func
+
+closure_func = outer_func()
+
+print(closure_func())  # Виведе 1
+print(closure_func())  # Виведе 2
+print(closure_func())  # Виведе 3
+Тут ми використовуємо список як контейнер для змінної counter, і можемо змінювати його значення, оскільки списки є змінними об'єктами.
+
+2. Використання атрибутів класу (альтернативний спосіб з класом)
+Замість функцій можна використовувати класи, щоб зберігати стан змінних. Це дозволяє змінювати значення без використання nonlocal.
+class Counter:
+    def __init__(self):
+        self.counter = 0
+    
+    def increment(self):
+        self.counter += 1
+        return self.counter
+
+c = Counter()
+
+print(c.increment())  # Виведе 1
+print(c.increment())  # Виведе 2
+print(c.increment())  # Виведе 3
+Тут ми зберігаємо змінну counter як атрибут класу, і можемо змінювати її через методи.
+
+Без nonlocal, пряме змінювання змінних у вкладених функціях неможливе. Але за допомогою таких підходів, як використання змінних об'єктів (списків, словників) або класів, можна досягти аналогічного результату.
+
+Так, в JavaScript немає еквіваленту nonlocal, оскільки механізм роботи з замиканнями дещо відрізняється від Python.
+
+Основні моменти:
+Локальні та глобальні змінні:
+
+У JavaScript, якщо ви оголошуєте змінну без ключових слів let, const або var, вона стає глобальною
+Локальні змінні в JavaScript, оголошені за допомогою let або const, доступні тільки в обсязі (scope) функції, в якій вони були створені.
+Вкладені функції в JavaScript автоматично мають доступ до змінних своєї батьківської функції без необхідності використовувати додаткові ключові слова.
+Це дозволяє вкладеним функціям використовувати та змінювати локальні змінні батьківської функції без необхідності вказувати, що вони "не локальні".
+function outer() {
+    let count = 0; // Локальна змінна
+    return function inner() {
+        count += 1; // Можемо змінювати count без nonlocal
+        return count;
+    };
+}
+
+const increment = outer();
+console.log(increment()); // Виведе 1
+console.log(increment()); // Виведе 2
+console.log(increment()); // Виведе 3
+Таким чином, JavaScript реалізує замикання без додаткових слів, таких як nonlocal. Просто потрібно слідкувати за обсягами видимості змінних, щоб не використовувати глобальні змінні без потреби.
+
+
 При возникновении ошибки - выполнение кода/программы останавливается
 Что бы этого избежать, ошибку нужно отловить
 Сделать это можно при помощи конструкции try, except
@@ -1789,3 +1892,479 @@ print(content_unpack) # {"symbol":"BTCUSDT","price":"58965.21000000"}
 print(type(content_unpack)) # <class 'dict'>
 price = float(content_unpack['price']) # После конвертации json в dict, с ним можно взаимодействовать как со словарем
 print(price) # 58937.64
+
+ООП (обьектно ориентированное программирование) - методология, стиль программирования, где программа представляется как совокупность обьектов, каждый из которых является экземпляром определенного класса
+Класс - это каркас, на основе которого можно создавать неограниченное количество его обьектов
+print(type('Hi')) # class str - строка является обьектом класса str
+print(type([1, 2, 3]) # class list
+print(type(str)) # class type - класс str является обьектом класса type (в Пайтон все является обьектами, в том числе классы)
+
+В Пайтон, класс обьявляется при помощи ключевого слова class, затем идет его название (с большой буквы) и двоеточие
+class Warrior:
+
+Метод __init__ магический метод класса, дандер-метод (double underscore), который создает, инициализирует его обьект
+Этот метод исполняется каждый раз при создании обьекта определенного класса
+В большинстве случаев, он ничего не возвращает (тоесть возвращает None), а только создает новый обьект
+def __init__(self):
+
+Ключевое слово self - указатель на текущий обьект класса
+Так как мы не знает как будет называтся обьект класса после его создания, это ключевое слово означает его при обьявлении класса
+После создания обьекта класса, self как бы будет переменной, в которую инициализируется обьект класса
+При исполнении аттрибутов/методов обьекта класса, self передавать в них не нужно
+def __init__(self, lvl):
+    self.level = lvl
+Параметры метода __init__ являются агрументами при создании экземпляра класса
+class Warrior:
+    def __init__(self, lvl):
+      # war1.level = lvl # Мы не знаем что обьект класса будет передан переменной war1 при обьявлении класса Warrior
+        self.level = lvl
+
+# self не передается
+war1 = Warrior(1) # значение для аттрибута level
+# Название обьекта класса war1 как бы заменяет self
+print(war1.level) # 1
+print(type(war1)) # class __main__.Warrior - обьект класса Warrior
+
+В методе __init__ указываются аттрибуты класса
+Так же, аттрибуты можно указать в самом классе, тогда их значения будут одинаковыми у всех экземпляров этого класса
+class Warrior:
+    def __init__(self, lvl):
+        self.level = lvl
+    
+    type = 'Warrior' # аттрибут одинаковых для всех обьектов класса Warrior
+
+war1 = Warrior(1)
+print(war1.level) # 1
+print(war1.type) # Warrior
+
+war2 = Warrior(5)
+print(war2.level) # 5
+print(war2.type) # Warrior - аттрибут класса Warrior одинаковый у всех обьектов этого класса
+
+Для создания обьекта класса - указывается название класса и круглые скобки, которые вызывают метод init
+Каждый обьект класса получает свое имя - присваивается переменной
+war1 = Warrior(3)
+print(war1) # <__main__.Warrior object at 0x000001A94F0D5D00> - обьект класса Warrior в ячейке памяти 0x000001A94F0D5D00
+print(type(war1)) # <class '__main__.Warrior'> - обьект класса Warrior, тип - Warrior
+Доступ к аттрибутам обьекта класса осуществляется с помощью точечной записи
+Аттрибуты, которые не являются методами, вызываются без круглых скобок
+print(war1.level) # 3
+war1.attack() # attack является методом класса
+Магические методы определяют как будет вести себя обьект класса с различными конструкциями языка
+Например магический метод __str__ отвечает за то, что будет выведено в консоль, когда обьект будет передан в функцию print
+print(war1) # <__main__.Warrior object at 0x000001A94F0D5D00> - стандартный магический метод __str__ в классе Warrior
+def __str__(self):
+    return f"This warrior has level {self.level}"
+
+print(war1) # This warrior has level 3 - после изменения магического метода __str__
+
+Свойства класса (property), указываются при помощи символа @ и слова property
+Свойства класса невозможно изменить в самом классе или за его пределами
+Доступ к свойствам так же осущевствляется через точечную запись
+При использовании свойств круглые скобки не указываются
+@property
+def defense(self):
+    armour = 5
+    if self.hp < 30:
+        armour *= 3
+    return armour
+
+war1.defense = 10 # AttributeError: property 'armour' of 'Warrior' object has no setter - свойство класса defense нельзя изменить вне класса
+print(war1.defense) # 5 # Круглые скобки не указываются
+В свойствах класса можно производить какие либо расчеты
+class Warrior:
+    def __init__(self, lvl):
+        self.level = lvl
+        self.base_hp = 100
+        self.hp = self.base_hp * self.level
+        self.full_hp = self.base_hp * self.level
+
+
+    @property
+    def heal(self):
+	self.defense = 10 # AttributeError: property 'armour' of 'Warrior' object has no setter - свойство класса defense нельзя изменить внутри класса
+        if (100 * self.hp) / self.full_hp < 45:
+            self.hp += self.hp / 2
+
+war1.hp = 50
+print('hp before heal', war1.hp) # 50
+war1.heal
+print('hp after heal', war1.hp) # 75.0
+
+Свойства класса можно использовать в других расчетах
+damage = 10
+war1.hp -= damage - war1.defense # 100 - (10 - 5) = 95. Использовано свойство defense
+
+Что бы изменять аттрибуты класса в свойствах - их названия должны отличатся
+class Warrior:
+    def __init__(self, lvl):
+        self.skill = 0
+
+    @property
+    def skilled(self):
+        self.skill += 123456789
+
+    @property
+    def skill(self): # Error
+        self.skill += 123456789
+
+    @property
+    def skill(self): # Error
+        skill += 123456789
+
+    @property
+    def skilled(self): # UnboundLocalError: cannot access local variable 'skill' where it is not associated with a value
+        skill += 123456789
+
+
+war1 = Warrior(1)
+print(war1.skill) # 0
+war2.skilled
+print(war1.skill) # 123456789
+
+К свойствам класса @property нужно обращатся, как к полям (переменным), тоесть без использования круглых скобок
+class MyClass:
+    def __init__(self, mark, model, year, power):
+        self.mark = mark
+        self.model = model
+        self.year = year
+        self.power = power
+
+    def minus1(self):
+        return self.year - self.power
+
+
+    @property
+    def minus2(self):
+        return self.year - self.power
+
+obj1 = MyClass('BMW', 'X5', 2024, 500)
+print(obj1.minus1()) # 1524 # Обращение к методу экземпляра класса требует 2 круглых скобок ()
+print(obj1.minus2()) # TypeError: 'int' object is not callable
+print(obj1.minus2) # 1524 # Обращение к property/свойству экземпляра класса происходит как к полю - без круглых скобок
+print(obj1.minus3)
+
+Часто, доступ к аттрибутам класса должен быть ограничен
+У Python, коли ви використовуєте два підкреслення перед ім'ям змінної (як у self.__secret), це означає, що змінна є приватною для класу
+Це частина механізму, званого "іменне маніпулювання" (name mangling).
+Це означає:
+1.) Приватність:
+Змінна __secret не повинна бути доступною ззовні класу. Це частина інкапсуляції, яка допомагає захистити дані.
+2.) Іменне маніпулювання:
+Python автоматично змінює ім'я __secret на _TestClass2__secret, щоб уникнути конфліктів з атрибутами з такими ж іменами в дочірніх класах.
+class TestClass2:
+    def __init__(self, v):
+        self.__secret = v
+Ви можете отримати доступ до __secret лише зсередини методів цього класу. Ззовні доступ буде обмежено.
+Ви можете змінити значення приватної змінної, але лише зсередини самого класу
+Для отримання або зміни значення приватної змінної ззовні - вам потрібно створити відповідні методи в класі.
+Наприклад, ви можете створити методи для отримання і зміни значення:
+class TestClass2:
+    def __init__(self, v):
+        self.__secret = v
+
+    def get_secret(self): # Для отримання значення змінної __secret
+        return self.__secret
+
+    def set_secret(self, new_value): # Для зміни значення змінної __secret
+        self.__secret = new_value
+
+obj = TestClass2(10)
+print(obj.get_secret())  # Виведе 10
+obj.set_secret(20)
+print(obj.get_secret())  # Виведе 20
+Таким чином, ви контролюєте доступ до приватної змінної через методи, що забезпечує інкапсуляцію.
+
+Також це можна зробити використовуючи властивості @property та сеттер до них
+Сеттер до властивості приймає лише один параметр окрім self
+Ім'я методу сеттер повинно відповідати імені властивості, яка в ньому змінюєтся (але помилку це не викликає)
+class TestClass:
+    def __init__(self, a, b, a1, b1):
+        self.start = a
+        self.__secret = b
+        self.start2 = a1
+        self.__secret2 = b1
+	# self.__secret *= 10 # Зміна приватного атрибуту класа всередині самого класа
+
+    def show_secret(self):
+        return self.__secret
+
+    def change_secret(self, c):
+        self.__secret = c
+
+    @property
+    def show_secret2(self): # Властивість классу для отримання приватної змінної за межами классу
+        return self.__secret2
+
+    @show_secret2.setter # Сеттер властивості @property
+    def change_secret2(self, e): # Властивість классу для зміни приватної змінної за межами классу
+        self.__secret2 = e
+
+    @show_secret2.setter # Сеттер властивості @property
+    def show_secret2(self, e, e1): # Викличе помилку, через другий параметр - е1
+        self.__secret2 = e
+
+
+o1 = TestClass(1, 2, 3, 4)
+print('start', o1.start)
+# AttributeError: 'TestClass' object has no attribute 'secret'
+# print(o1.secret)
+# AttributeError: 'TestClass' object has no attribute '__secret'. Did you mean: 'show_secret2'?
+# print(o1.__secret)
+# AttributeError: 'TestClass' object has no attribute 'secret2'. Did you mean: 'show_secret2'?
+# print(o1.secret2)
+# AttributeError: 'TestClass' object has no attribute '__secret2'. Did you mean: 'show_secret2'?
+# print(o1.__secret2)
+
+o1.secret = 5
+print(o1.secret)  # 5 - New attribute secret created
+o1.__secret = 8
+print(o1.__secret)  # 8 - New attribute __secret created
+print(dir(o1))  # ['_TestClass__secret', '__secret', 'secret', ...]
+print('show secret before change', o1.show_secret())
+o1.change_secret(9)  # The value of the _TestClass__secret private attribute changed to 9
+print('show secret after change', o1.show_secret())
+
+print('start2', o1.start2)
+o1.secret2 = 'Hi'
+print(o1.secret2)  # Hi - New attribute secret created
+o1.__secret2 = 'Wow'
+print(o1.__secret2)  # Wow - New attribute __secret created
+print(o1.show_secret2)
+print(dir(o1))  # ['_TestClass__secret2', '__secret2', 'secret2', ...]
+o1.change_secret2 = 11
+print(o1.show_secret2)
+
+Поля обьекта класса можно обьявлять и после его создания, однако это считается плохим примером и так делать не стоит
+war1.mana = 4500
+Все поля нужные обьекту должны быть обьявлены в его классе (в методе init или снаружи), а не в обьекте
+
+Пайтон не поддерживает перегрузку методов - несколько реализаций одного метода (с разным количеством параметров, результатом) с одним и тем же названием
+class MyClass:
+  def plus(self):
+    return 3
+    
+  def plus(self, a): # В данном примере происходит пепезапись метода plus, а не его перегрузка
+    return 2+a
+  
+    
+a = MyClass()
+print(a.plus()) # TypeError: plus() missing 1 required positional argument: 'a'
+
+Но в тоже время
+class TestClass:
+    def __init__(self, a, b, a1, b1):
+        self.start = a
+        self.__secret = b
+        self.start2 = a1
+        self.__secret2 = b1
+
+    @property
+    def show_secret2(self):
+        return self.__secret2
+
+    @show_secret2.setter
+    def show_secret2(self, e):
+        self.__secret2 = e
+
+o1 = TestClass(1, 2, 3, 4)
+print(o1.show_secret2) # 4 # Свойство для получения приватной переменной
+o1.show_secret2 = 11 # Одноименное свойство для изменения приватной переменной
+print(o1.show_secret2) # 11 # И оба свойства выполнились верно
+Почему, если Пайтон не поддерживает перегрузку методов ? Или он поддерживает перегрузку свойств @property ?
+В данном случае у методов одинакоевое имя, но один является геттером, а второй сеттером
+У цьому прикладі метод show_secret2 не є перевантаженням у класичному розумінні, оскільки в Python властивості (property) не перевантажуються
+Натомість, Python дозволяє створювати властивості з одним і тим самим іменем, але різними доступами до них (getter і setter).
+
+Як це працює:
+Коли ви визначаєте метод як властивість за допомогою декоратора @property, ви створюєте getter, який дозволяє отримати значення приватної змінної.
+Декоратор @show_secret2.setter створює setter, який дозволяє змінювати значення тієї ж змінної через ту саму властивість.
+Це не перевантаження, а скоріше стандартна практика для створення інтерфейсу доступу до приватних змінних через властивості.
+class TestClass:
+    def __init__(self, a, b, a1, b1):
+        self.start = a
+        self.__secret = b
+        self.start2 = a1
+        self.__secret2 = b1
+
+    @property
+    def show_secret2(self):
+        return self.__secret2  # Getter для отримання значення __secret2
+
+    @show_secret2.setter
+    def show_secret2(self, e):
+        self.__secret2 = e  # Setter для зміни значення __secret2
+
+@property дозволяє викликати o1.show_secret2 без круглих дужок, як атрибут, хоча це фактично метод для отримання значення.
+@show_secret2.setter дозволяє змінювати значення приватної змінної, використовуючи ту ж властивість o1.show_secret2, наприклад, o1.show_secret2 = 11.
+Метод show_secret2 не перевантажується, а використовується як властивість з двома доступами: один для отримання значення (getter) і один для його зміни (setter)
+Це стандартна концепція у Python для роботи з інкапсуляцією даних через властивості
+
+Для иммитации перегрузки методов можно использовать
+1.) Значения аргументов по умолчанию
+class MyClass:
+    def my_method(self, a=None, b=None):
+        if a is not None and b is not None:
+            print(f"Two arguments: a = {a}, b = {b}")
+        elif a is not None:
+            print(f"One argument: a = {a}")
+        else:
+            print("No arguments")
+
+obj = MyClass()
+obj.my_method()       # No arguments
+obj.my_method(1)      # One argument: a = 1
+obj.my_method(1, 2)   # Two arguments: a = 1, b = 2
+
+2.) Неопределенное количество аргументов - *args (для позиционных аргументов) и *kwargs (для аргументов с ключевыми словами)
+class MyClass:
+    def my_method(self, *args):
+        if len(args) == 1:
+            print(f"One argument: {args[0]}")
+        elif len(args) == 2:
+            print(f"Two arguments: {args[0]}, {args[1]}")
+        else:
+            print(f"{len(args)} arguments passed")
+
+obj = MyClass()
+obj.my_method(1)          # One argument: 1
+obj.my_method(1, 2)       # Two arguments: 1, 2
+obj.my_method(1, 2, 3)    # 3 arguments passed
+
+
+1.) Наследование - концепция обьектно-ориентированного программирования, согласно которой, абстрактный тип данных может наследовать данные и функциональность некоторого существующего типа,
+способствуя повторному использованию компонентов и расширению имеюшегося функционала
+2.) Полиморфизм (многообразие) - понятин, которое позволяет разным сущностям выполнять одни и те же действия
+Возможность использовать одни и те же методы для объектов разных классов
+Переопределение является полиморфизмом ?
+3.) Инкапсуляция - принцип, согласно которому внутреннее устройство сущностей нужно собирать, объединять в специальной «оболочке» и скрывать от вмешательств извне.
+Доступ к объектам возможен через специальные открытые методы, а напрямую обратиться к их содержимому нельзя.
+Упаковка данных и функций в один компонент (например, класс) и последующий контроль доступа к этому компоненту, создавая тем самым "чёрный ящик" из объекта.
+По этой причине, пользователю необходимо знать только интерфейс этого класса (то есть данные и функции, предоставляемые для взаимодействия с классом извне), а не то, как он реализован внутри.
+Инкапсуляция реализуется при помощи классов, модулей и модификаторов доступа
+
+1.) Наследование
+Одни классы могут наследовать другие, тем самым получая все их аттрибуты и расширяя их своими собственными
+Таким образом, в классах наследниках не нужно дублировать аттрибуты класса родителя
+Для наследования классов, в Пайтон, родительский класс нужно указать в круглых скобках при обьявлении нового класса
+class Parent:
+    pass
+
+class Child(Parent): # Класс Child наследует класс Parent
+    pass
+В классе родителе можно указывать свойства, которые отсутствуют в нем, но есть в классах наследниках
+В таком случае, такой код будет корректно выполнятся для обьектов классов наследников, потому что там эти аттрибуты обьявлены
+Конечно же, с экземплярами родительского класса - выпадет ошибка, так как в нем они не определены
+class Character:
+    def __init__(self, lvl):
+        self.level = lvl
+        self.hp = self.base_hp * self.level # self.base_hp - нет в классе Character, но есть в классе наследнике Elf
+        self.attack_points = self.base_attack_points * self.level # self.base_attack_points так же нет в классе Character, но есть в классе наследнике Elf
+
+class Elf(Character):
+    character_name = 'Elf'
+    base_hp = 50 # base_hp аттрибут определен
+    base_attack_points = 15 # base_attack_points аттрибут так же обьявлен
+    base_defence = 10
+
+main_char = Character(5) # AttributeError: 'Character' object has no attribute 'base_hp'
+elf1 = Elf(5) # обьект класса создан успешно
+
+В классе наследнике можно получить доступ к свойствам родительского класса с помощью встроенной функции super()
+Доступ возможен только внутри свойств класса наследника @property и только к свойствам @property и тем, что обьявлены вне функции __init__, в родительском классе
+super().parent_property
+class Cl1:
+    def __init__(self, a):
+        self.start = a - недоступно в классе наследнике нигде
+
+    out = 10 - доступно в классе наследнике, только в @property
+
+    @property - доступно в классе наследнике, только в @property
+    def check1(self):
+        return self.start
+
+class Cl2(Cl1):
+    # The access to the attributes of the parent class in the __init__ method is absent with the super() method
+    # RuntimeError: super(): no arguments
+    # cl2_start = super().start - свойство родительского класса из метода __init__, недоступно в классе наследнике
+
+    # RuntimeError: super(): no arguments
+    # cl2_start = super().check1 - доступно только внутри @property
+
+    # RuntimeError: super(): no arguments
+    # cl2_start = super().out - доступно только внутри @property
+
+    # The access is absent even in the property of the child class
+    # @property
+    # def change_start(self):
+    #     return super().start - свойство родительского класса из метода __init__, недоступно в классе наследнике
+
+    @property
+    def change_start(self):
+        return super().check1 * 10 - доступно только внутри @property
+
+    @property
+    def change_out(self):
+        return super().out * 10 - доступно только внутри @property
+
+class2 = Cl2(1)
+print(class2.start) # 1
+print(class2.change_start) # 10
+print(class2.change_out) # 100
+
+
+@property - это стандартный декоратор Пайтон
+Декоратор, в Пайтон, это функция, которая принимает как аргумент - другую функцию и обогощает/увеличивает/изменяет ее поведение, результат ее выполнения
+Декоратор - это функция
+Как аргумент, она принимает функцию, поведение которой нужно модернизировать
+Внутри декоратора - обьявляется функция-обертка
+Она должна иметь параметры, если функция, переданная декоратору, имеет параметры
+Внутри нее - вызывается эта функция
+Декоратор возвращает свою внутреннюю функцию-обертку
+Для вызова декоратора - он указывается с символом @ над функцией, которую нужно модернизировать 
+def my_decorator(func): # Обьявление декоратора
+    print('my_decorator')
+    # def wrapper(*args, **kwargs): - пример из курса
+    def wrapper(j, k):
+        print('wrapper')
+        if k == 0:
+            return "Cannot divide by zero"
+        return func(j, k)
+    return wrapper
+
+def divide1(a, b): # Функция без декоратора
+    return a / b
+
+print(divide1(10, 0)) # Будет выброшена ошибка
+
+
+@my_decorator # Вызов декоратора
+def divide2(a, b): # Функция, поведение которой нужно модернизировать, для которой вызывается декоратор
+    return a / b
+
+print(divide2(10, 0)) # Cannot divide by zero - Будет выведена строка вместо ошибки
+
+Декоратор является синтаксическим сахаром - тоесть конструкцией языка которая ускоряет написание кода
+Так как декоратор - это синтаксический сахар, тоесть конструкция языка, которая ускоряет написание кода, то вызвать его можно и таким образом, такой вызов будет эквиваентным
+print(my_decorator(divide1)(10, 0)) # Cannot divide by zero
+В результате вызова декоратора - будет возвращена функция-обертка
+Затем она будет вызвана с аргументами 10 и 2
+Внутри нее - будет вызвана функция divide1 с теми же аргументами и возвращен результат ее выполнения
+Если второй аргумент будет 0 - будет возвращена строка Cannot divide by zero
+
+
+Менеджер контекста - обеспечивает удобный и безопасный способ работы с ресурсами, такими как базы данных, файлы и потоки, упрощая управление и гарантируя корректное освобождение ресурсов после использования
+Он используется когда есть 2 парные операции, например открыть и закрыть файл, и тут можно забыть закрыть файл когда работа с ним будет закончена
+Менеджер контекста гарантирует, что, после завершения работы с файлом (любым другим ресурсом) - он будет закрыт
+К таким операциям так же относится установка соединения с БД и завершение его
+file = open("file.txt", "r")
+try:
+    # Действия с файлом
+    content = file.read()
+    print(content)
+finally:
+    file.close() # Обязательная операция иначе файл так и останется открытым
+
+with open("file.txt", "r") as file: # Оператор with гарантирует закрытие файла, после завершения работы с ним
+    content = file.read()
+    print(content)
