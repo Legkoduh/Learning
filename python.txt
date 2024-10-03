@@ -2200,6 +2200,70 @@ o5 = Class4.new_init(1)
 print(isinstance(o5, Class3))  # True
 print(o5.n) # 1
 
+Итого, существует 3 типа методов:
+1.) Методы экземпляра класса (так же существуют поля экземпляра класса - обьявляются в методе-конструкторе __init__)
+2.) Методы класса (так же есть переменные класса- обьявляются вне методов)
+3.) Статический метод
+class MyClass:
+    def __init__(self, value):
+        self.start = value
+
+    out = 10
+
+    def instance_method(self):
+        return self.start + 1
+
+    @classmethod
+    def class_method_like_init(cls, v):
+        obj = cls(v)
+        print('class method like init, obj start =', obj.start)
+        return obj.instance_method()
+
+    @staticmethod
+    def static_method(val):
+        # Has access to the attributes of the class only by its name
+        # Cannot get them in other way
+        # return MyClass.out
+        return MyClass.class_method_like_init(val)
+Обязательно, первым параметром в методе экземпляра класса идет self - ссылка/указатель на текущий обьект класса, тоесть на самого себя
+Название self - общепринятое, но не обязательное, можно использовать любое название, главное что б оно стояло на первом месте
+Длагодаря self имеют доступ к аттрибутам экземпляра класса и могут менять его поведение
+Так же, используя self.__class__ можно получить доступ к переменным и методам самого класса и менять его состояние
+Изменение переменных класса приводит к их изменениям для всех обьектов этого класса, как уже существующих так и новых
+Метод экземпляра класса вызывается от созданного экземпляра
+o1.instance_method()
+Так же, может вызыватся и от класса, но тогда в качестве аргумента должен принимать существующий обьект этого класса
+MyClass.instance_method(o1)
+
+Метод класса обьявляется при помощи декоратора @classmethod
+Обязательно, в качестве первого параметра принимает cls - ссылку/указатель на текущий класс/самого себя
+Методы класса привязаны к самому классу, а не его экземплярам
+Благодаря cls имеют доступ к переменным и методам класса и могут менять его поведение, что отразится на всех обьектах этого класса
+Но не могут изменять конкретный, отдельный обьект класса
+
+Статические методы обьявляются при помощи декоратора @staticmethod
+Им не нужен определенный, обязательный первый параметр (как self или cls)
+Статические методы прикреплены к классу "для удобства" и не могут изменять поведение ни класса, ни его экземпляров
+Эти методы не имеют доступа ни к аттрибутам класса, ни к аттрибутам экземпляра класса
+Они могут работать только с теми данными, которые им передаются в качестве параметров
+Вызов через точку нужен лишь для удобства. На самом же деле в случае статического метода никакие аргументы (self или cls) методу не передаются.
+
+Метод экземпляра класса, метод класса и статический метод можно вызывать от обьекта класса
+o1.instance_method()
+o1.class_method(1)
+o1.static_method(2)
+Метод класса и статический метод можно вызывать от класса
+MyClass.class_method(1)
+MyClass.static_method(2)
+Но вызов метода обьекта класса от класса - приведет к ошибке, так как в этот метод не передается обьект этого класса (self - обьект класса)
+MyClass.instance_method() # TypeError: MyClassAgain.obj_method() missing 1 required positional argument: 'self'
+
+Метод экземпляра класса имеет доступ к обьекту класса через параметр self и к классу через свойство self.__class__ и может менять их
+Метод класса имеет доступ к классу через параметр cls и может его менять, но не имеет доступ к обьектам класса
+Этот метод часто используется как генерирующий метод для создания нового обьекта класса, но не обычного, как в методе __init__, а измененного
+Статические методы работают как обычные функции, но принадлежат области имён класса.
+Они не имеют доступа ни к самому классу, ни к его экземплярам, используются как вспомогательные и работают с данными, которые им передаются
+
 
 Для создания обьекта класса - указывается название класса и круглые скобки, которые вызывают метод init
 Каждый обьект класса получает свое имя - присваивается переменной
@@ -2538,7 +2602,92 @@ class Elf(Character):
 main_char = Character(5) # AttributeError: 'Character' object has no attribute 'base_hp'
 elf1 = Elf(5) # обьект класса создан успешно
 
-В классе наследнике можно получить доступ к свойствам родительского класса с помощью встроенной функции super()
+При создании обьекта класса наследника - вызывается метод-конструктор __init__ родительского класса
+class Employee:
+    def __init__(self, name, id, age):
+        self.name = name
+        self.id = id
+        self.age = age
+
+
+    def __str__(self):
+        return f"The employee's name is {self.name}, id is {self.id} and age is {self.age}"
+
+class Driver2(Employee):
+    pass # Метод __init__ не указан в классе наследнике и поэтому будет вызван этот метод из родительского класса
+
+driver2 = Driver2('Max', 2, 23)
+print(driver2.name) # Max
+print(driver2) # The employee's name is Max, id is 2 and age is 23
+
+В классе наследнике можно получить доступ к:
+1.) аттрибутам и методам обьекта класса родителя
+2.) переменным и методам класса (@classmethod) родителя
+3.) статическим методам (@staticmethod) класса родителя
+4.) свойствам @property класса родителя
+Сделать это можно при помощи метода super(), в его собственном методе-конструкторе __init__
+Там же, эти аттрибуты можно изменять для обьектов класса наследника или добавлять им новые
+class Employee: # Родительский класс
+    main_class_var = 1
+    def __init__(self, name, id, age):
+        self.name = name
+        self.id = id
+        self.age = age
+
+    def __str__(self):
+        return f"The employee's name is {self.name}, id is {self.id} and age is {self.age}"
+
+    # Works as __str__ but, looks like the __str__ method has a higher priority
+    # def __repr__(self):
+    #     return f"The employee's name is {self.name}, id is {self.id} and age is {self.age}"
+
+    def main_function(self):
+        return self.age * 2
+
+    @classmethod
+    def main_class_method(cls):
+        return cls('Test', 11, 21).name
+
+    @property
+    def main_property(self):
+        return 'Main '+self.name
+
+
+class Driver3(Employee): # Класс наследник
+    child_class_out = 10
+    # RuntimeError: super(): no arguments
+    # out2 = super().main_out
+    def __init__(self, a, b, c, d):
+        super().__init__(b, c, d)
+	self.new_child_attribute = a
+        self.age *= 10
+        self.main_class_var_res = self.main_class_var
+        self.main_class_prop_res = self.main_property
+        self.main_class_func_res = self.main_function()
+        self.main_class_method_res = Employee.main_class_method()
+
+    def show(self):
+        return super().main_class_var
+        #return 'Wow'
+
+    @classmethod
+    def child_class_method(cls):
+        return cls.main_class_method()
+
+    @staticmethod
+    def child_class_static_method():
+        return 'Hi'
+
+    @property
+    def show2(self):
+        return super().main_class_var
+
+driver3 = Driver3('Alex', 3, 19)
+print(driver3.age) # 190
+print(driver3) # The employee's name is Alex, id is 3 and age is 190
+Так же, в методе __init__ класса наследника можно получить доступ к свойствам @property родительского класса
+
+В классе наследнике можно получить доступ к свойствам @property родительского класса в свойствах класса наследника, с помощью встроенной функции super()
 Доступ возможен только внутри свойств класса наследника @property и только к свойствам @property и тем, что обьявлены вне функции __init__, в родительском классе
 super().parent_property
 class Cl1:
