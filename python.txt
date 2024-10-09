@@ -1,4 +1,4 @@
- Перевірити чи встановленний Пайтон на ПК:
+Перевірити чи встановленний Пайтон на ПК:
 Open the command line or PowerShell and type in: python --version
 Якщо Пайтон встановленний на ПК - буде показана його версія, якщо ні - нічего
 
@@ -2618,8 +2618,18 @@ driver2 = Driver2('Max', 2, 23)
 print(driver2.name) # Max
 print(driver2) # The employee's name is Max, id is 2 and age is 23
 
-Проинициализировать аттрибуты обьекта класса наследника можно при помощи вызова метода-конструктора __init__ класса родителя в методе __init__ класса наследника
-Сделать это можно при помощи метода super() - этот метод вызывает методы родительского класса
+Так же проинициализировать все нужные аттрибуты обьекта класса наследника можно вручную в его собственном методе __init__, и в нем же можно добавить новые аттрибуты
+class Driver2(Employee):
+    def __init__(self, name1, id1, auto_type, age1):
+	self.name = name
+        self.id = id
+        self.age = age
+	self.auto_type = auto_type # Добавление нового аттрибута обектам класса наследника. У обьектов класса родителя их не будет
+Но это не удобно и не совсем правильно
+Правильно это делать - при помощи вызова метода-конструктора __init__ класса родителя в методе __init__ класса наследника
+Сделать это можно при помощи метода super()
+super() - это метод который указывает на родительский класс и вызывает методы родительского класса
+Если в классе наследнике нужно получить доступ к методам родительского класса нужно использовать метод super() (а не ключевое слово self ?)
 Так же, в методе-конструкторе __init__ класса наследника можно добавлять новые аттрибуты его обьектам
 class Employee:
     def __init__(self, name, id, age):
@@ -2644,6 +2654,7 @@ print(driver2.auto_type) # SUV
 print(driver2) # The employee's name is Alex, id is 3 and age is 27
 
 Все аттрибуты и методы обьекта класса родителя, переменные, методы, статические методы и свойства @property класса родителя доступны обьектам класса наследника при помощи точечной записа
+???
 
 В классе наследнике можно получить доступ к:
 1.) аттрибутам (обьявляются в методе __init__) и методам обьекта класса родителя
@@ -2697,8 +2708,6 @@ class Employee:
     def parent_prop(self):
         # return self.name
         return 13
-
-
 
 class Driver2(Employee):
     def __init__(self, n, id, a):
@@ -2833,6 +2842,43 @@ print(my_decorator(divide1)(10, 0)) # Cannot divide by zero
 Затем она будет вызвана с аргументами 10 и 2
 Внутри нее - будет вызвана функция divide1 с теми же аргументами и возвращен результат ее выполнения
 Если второй аргумент будет 0 - будет возвращена строка Cannot divide by zero
+
+
+В классах наследниках доступно переопределение методов - изменение поведения методов родительского/базового класса
+Для этого в классах наследниках обьявляется метод с таким же названием как и метод в родительском класса, но изменяется его функционал
+class Employee:
+    def __init__(self, name: str, id: int, age: int = 16):
+        self.name = name
+        self.id = id
+        self.age = age
+    def parent_method_for_change_in_child(self):
+        return self.age + self.id
+
+class Driver4(Employee):
+    def __init__(self, name: str, id: int):
+        super().__init__(name, id)
+
+    def parent_method_for_change_in_child(self): # Переопределение метода родительского класса
+        return (super().parent_method_for_change_in_child() * 12) # Вызов метода parent_method_for_change_in_child родительского класса с помощью функции super()
+
+driver4 = Driver4('Vins', 14)
+print(driver4.parent_method_for_change_in_child()) # 360 # (14 + 16) * 20
+
+
+class Driver5(Employee):
+    def __init__(self, name: str, id: int):
+        super().__init__(name, id)
+
+    def parent_method_for_change_in_child(self): # Переопределение метода родительского класса
+        return self.id * 19
+
+driver5 = Driver5('Won', 15)
+print(driver5.parent_method_for_change_in_child()) # 285 # 15 * 19
+
+
+Тип переменных можно указывать при их обьявлении
+check_list: list[int] = [1, 2, 3]
+print(check_list) # [1, 2, 3]
 
 
 Менеджер контекста - обеспечивает удобный и безопасный способ работы с ресурсами, такими как базы данных, файлы и потоки, упрощая управление и гарантируя корректное освобождение ресурсов после использования
