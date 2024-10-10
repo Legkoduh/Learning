@@ -2467,9 +2467,33 @@ print(dir(o1))  # ['_TestClass__secret2', '__secret2', 'secret2', ...]
 o1.change_secret2 = 11
 print(o1.show_secret2)
 
+Також getter для приватних змінних може мати такеж ім'я як і сама змінна
+І це буде більш правильно, тому що звертаючись до імені цієї змінної можна отримати її значення, а також змінити його
+class Driver7:
+    def __init__(self, v):
+        self.__start = v
+
+    @property
+    # def getter_different_name(self):
+    def start(self):
+        return self.__start
+
+    @start.setter
+    # def setter_different_name(self, v): # Інше ім'я для setter
+    def start(self, v):
+        self.__start = v
+
+driver7 = Driver7(4)
+# print(driver7.getter_different_name)
+print(driver7.start) # 4 # Звертаючись до імені приватної змінної можна отримати її значенния
+# driver7.setter_different_name = 12
+driver7.start = 10 # За допомогою імені приватної змінної можно змінити її значення
+print(driver7.start) # 10
+
 Поля обьекта класса можно обьявлять и после его создания, однако это считается плохим примером и так делать не стоит
 war1.mana = 4500
 Все поля нужные обьекту должны быть обьявлены в его классе (в методе init или снаружи), а не в обьекте
+
 
 Пайтон не поддерживает перегрузку методов - несколько реализаций одного метода (с разным количеством параметров, результатом) с одним и тем же названием
 class MyClass:
