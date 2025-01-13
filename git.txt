@@ -109,7 +109,7 @@ git merge new_branch (name of the branch) - мердж new_branch ветки в 
 Мерж new_branch ветки в best_branch ветку:
 git checkout best_branch
 git merge new_branch
-git pish
+git push
 Мерж был произведен в локальном репозитории, а для мержа в удаленном - необходимо провести git push
 merge - слияние 2-х веток (удаленной master с локальной dev)
 Мердж ветки в мастер ветку отображается коммитом
