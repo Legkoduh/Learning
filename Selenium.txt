@@ -1,0 +1,88 @@
+WebDriver - API для управления поведением браузера
+Каждый браузер поддерживается определенной реализацией Драйвера (Chromedriver)
+Driver - компонент/сущность отвечающая за делегирование полномочий браузеру
+Драйвер обеспечивает обмен данными между Selenium и браузером
+Selenium - фреймворк, связывающий все эти части вместе при помощи пользовательского интерфейса - кода на Python, Java и других языках программирования
+Позволяет использовать все части браузера, обеспечивая кросс-браузерную и кросс-платформенную автоматизацию действий в браузере
+
+1. Selenium + WebDriver > 2. Driver (Chromedriver) > 3. Browser > 4. Driver > 5. Selenium + Webdriver
+1. Описываются действия для управления браузером при помощи языка программирования (открой ссылку, нажми на кнопку и тд)
+2. Этот код передается Драйверу
+3. Драйвер передает все эти действия Браузеру
+Браузер выполняет описанные действия и возвращает результат обратно Драйверу
+4. Драйвер получает результат выполненых действий и передает их в Selenium
+5. В Селениум выполняются нужные действия
+
+Создаем новый проект
+Создает виртуальное окружение: python3 -m venv venv
+В результате, в корневой директории проекта появится папка venv
+Затем нужно активировать виртуальное окружение: venv/Scripts/activate.ps1 (on Windows), source venv/bin/activate (for MacOS)
+После этого, в терминале, в начале строки, появится (venv), это будет означать, что окружение активировано
+Далее нужно установить Selenium и WebDriver manager: pip3 install selenium webdriver-manager
+Webdriver manager позволяет автоматически скачивать и устанавливать самую новую версию Драйвера для того или иного браузера без скачивания и замены бинарных файлов в проектах
+После этого можно создать новый Пайтон файл для написания кода
+В него нужно импортировать Вебдрайвер
+from selenium import webdriver
+Потом из webdriver-manager импортируем необходимый драйвер, в зависимости от нужного браузера (Chrome - chromedriver)
+from webdriver_manager.chrome import ChromeDriverManager
+Так же нужно импортировать класс Service, который появился в Selenium 4
+Он отвечает за установку, открытие и закрытие Драйвера
+from selenium.webdriver.chrome.service import Service
+
+В Selenium 4 инициализация Драйвера происходит через обьект класса Service
+service = Service(executable_path=ChromeDriverManager().install()) # Обьект класса Service
+executable_path - путь к нашему Драйверу, а так как у нас используются не .bin файлы, а DriverManager, указывается путь к его методу install
+Это метод установит Драйвер и передаст путь к нему в Service
+Затем инициализируется сам Драйвер
+driver = webdriver.Chrome(service=service)
+Теперь можно запустить программу - будет открыт и закрыт Хром браузер
+Закрывается он автоматически благодаря Service, который отвечает за его закрытие, driver.quit() теперь не нужно указывать
+
+Драйвер Firefox создается по аналогичной схеме
+from selenium import webdriver
+from webdriver_manager.firefox import GeckoDriverManager
+from selenium.webdriver.firefox.service import Service
+
+service = Service(executable_path=GeckoDriverManager().install())
+driver = webdriver.Firefox(serivce=service)
+
+Управление кнопками браузера
+driver.forward() - кнопка браузера Вперед
+driver.back() - кнопка браузера Назад
+driver.refresh() - кнопка браузера Перезагрузить страницу
+
+Получение данных страницы
+driver.current_url - текущий урл страницы
+driver.title - заголовок текущей страницы
+driver.page_source - исходный код страницы
+
+Валидировать данные можно при помощи условия assert
+После запятой можно указать сообщение, которое будет выведено в случает неудачи
+assert url == 'https://www.motorsport.com/', 'Invalid URL'
+
+
+find.element() - метод для поиска элементов на странице
+В качестве аргументов он принимает:
+1. метод поиска: по xpath, class name, css селектору, id
+2. значение локатора, по которому находится веб-элелемент
+driver.find_element('xpath', '/html/body/rz-app-root/div/div[1]/rz-main-header/header/div/div/button[1]')
+Методы поиска: "id", "xpath", "name", "class name", "css selector"
+
+Так же, искать элементы можно при помощи класса By импортируемого из selenium
+Но для этого в каждом файле нужно его импортировать, что не очень удобно
+from selenium.webdriver.common.by import By
+driver.find_element(By.XPATH, '/html/body/rz-app-root/div/div[1]/rz-main-header/header/div/div/button[1]')
+
+С точки зрения веб-приложения, веб элемент - это любой элемент на странице
+В Селениум, веб-элемент - это тип данных, обьект класса WebElement
+driver.get('https://rozetka.com.ua/ua/')
+button = driver.find_element('xpath', '/html/body/rz-app-root/div/div[1]/rz-main-header/header/div/div/button[1]')
+print(type(button)) # <class 'selenium.webdriver.remote.webelement.WebElement'>
+
+find_elements() - возвращает список элементов у которых одинаковое значение переданного локатора
+Так как это список, обращаться к его элементам можно по индексу
+Например, если несколько элементов на странице имеют одинаковый class name или id, все их можно получить
+titles_list = driver.find_elements('class name', 'title') # [<selenium.webdriver.remote.webelement.WebElement (session="dfb302d11ee9c83fc441db462e5da5b0", element="f.D70249E009AB57F28B2CCACB2B319D5D.d.EC3100381E02A306C64042C8F171B949.e.153")>,
+<selenium.webdriver.remote.webelement.WebElement (session="dfb302d11ee9c83fc441db462e5da5b0", element="f.D70249E009AB57F28B2CCACB2B319D5D.d.EC3100381E02A306C64042C8F171B949.e.154")>, ...,
+<selenium.webdriver.remote.webelement.WebElement (session="dfb302d11ee9c83fc441db462e5da5b0", element="f.D70249E009AB57F28B2CCACB2B319D5D.d.EC3100381E02A306C64042C8F171B949.e.176")>]
+titles_list[1] # <selenium.webdriver.remote.webelement.WebElement (session="dfb302d11ee9c83fc441db462e5da5b0", element="f.D70249E009AB57F28B2CCACB2B319D5D.d.EC3100381E02A306C64042C8F171B949.e.154")>

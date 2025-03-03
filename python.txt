@@ -4021,6 +4021,95 @@ asyncio.run(async_main2(links))
 Цикл for t in tasks замінено на for t in asyncio.as_completed(tasks) - це дозволяє виводити результати задач у міру їх завершення, а не за порядком їх створення
 Тепер третє посилання, яке обробляється швидше, буде виведене раніше за друге (яке має затримку)
 Але в реальних прикладах це важко використовувати, бо потрібні результати всіх трьох запитів, а як відокремити швидкі від повільних, що б спочатку використовувати результати швидких, а потім повільних ?
+В asyncio.as_completed() можна передати корутини, в такому разі, він автоматично (під капотом) огорне їх у задачі
+
+В момент запуска, asyncio.run создается цикл событий, который запускает все задачи и контролирует их выполнение
+Когда задача завершается, цикл событий сообщает asyncio.as_completed(), что задача завершена и готова к обработке
+Итератор asyncio.as_completed() передает эту задачу в цикл и можно получить ее результат используя ключевое слова await
+for t in asyncio.as_completed(tasks): # Генератор asyncio.as_completed() содержит завершенную, на данный момент, задачу, которую передает в цикл for
+    result = await t # Получение результата задачи, которую вернул генератор asyncio.as_completed()
+    print(result)
+
+/\ Почему asyncio.as_completed() начинает выполнение медленных задач, которые еще не завершились, если есть быстрые, которые уже готовы ?
+Возможно он начинает выполнение всех задач, а когда достигает медленных, просто пропускает их и переходит к следующим, а когда медленные будут завершены - возвращается к ним
+
+Метод asyncio.as_completed() возвращает результат задачи, если она завершилась, но если нет - не ждет ее завершения, а переходит к следующей
+
+
+Получение результата 1 запроса
+tests = ['https://www.motorsport.com/',
+    'https://www.autosport.com/f2/',
+    'https://www.autosport.com/fia-f3/',
+    'https://www.autosport.com/f1/',
+    'https://www.autosport.com/f3/',
+    'https://www.autosport.com/']
+
+async def temp_fn(links):
+    tasks = []
+    for l in links:
+        task = asyncio.create_task(check_status_of_one_link(l))
+        tasks.append(task)
+    
+    # result = await asyncio.gather(*tasks)
+    # return result
+
+    # result = []
+    # for t in tasks:
+    #     res = await t
+    #     result.append(res)
+    #
+    # return result
+
+    # result = []
+    # for t in asyncio.as_completed(tasks):
+    #     res = await t
+    #     result.append(res)
+    #
+    # return result
+
+
+    # Waits for the slowest request and only after that return results of it's and all next requests
+    # for t in tasks:
+    #     res = await t
+    #     print(res)
+
+    # When the slowest query is reached, it does not block the next ones, runs them and returns their results
+    # And when the slowest query is completed - returns its result.
+    for t in asyncio.as_completed(tasks):
+        res = await t
+        print(res)
+
+
+print(asyncio.run(temp_fn(tests)))
+
+
+Получение результатов нескольких запросов
+Для этого нужна промежуточная функция, она будет возвращать корутину, которая будет оборачиваться в Задачу. Результат всех Задач (запросов) будет ожидаться в главной функции
+async def check_status_of_few_links(links):
+    tasks = []
+    async with aiohttp.ClientSession() as session:
+        for l in links:
+            task = asyncio.create_task(check_status_of_one_link(session, l))
+            tasks.append(task)
+    # result = await asyncio.gather(*tasks) * Leads to the Session closed error, потому что задачи из tasks еще не завершились, но сессия уже закрылась, что приводит к ошибке
+
+        result = await asyncio.gather(*tasks)
+
+async def check_status_of_one_link(s, l): # Промежуточная функция, которая возвращает корутину
+    print('Hi', s)
+    async with s.get(l) as response:
+        print(l, response.status)
+        return response.status
+
+
+print(asyncio.run(check_status_of_few_links(tests)))
+
+* Після завершення циклу for, коли блок async with завершується, сесія закривається, і якщо на цей момент асинхронні запити ще не завершені (хоча вони вже розпочалися), ти отримуєш помилку, бо сесія вже не активна
+Навіть якщо запит почав виконуватись, сесія повинна бути активною до самого завершення запиту. Це обов'язкова умова
+aiohttp.ClientSession() управляє ресурсами підключення, такими як TCP-з'єднання та збереження з'єднань для повторних запитів
+Якщо сесія закривається (наприклад, через завершення блоку async with), всі ці ресурси звільняються
+Підключення до сервера для запиту залишається відкритим лише в рамках активної сесії
+Якщо сесія закривається, навіть якщо запит вже почав виконуватись, він більше не має доступу до тих самих ресурсів (з'єднання, таймаутів, збереження cookies тощо), і спроба продовжити запит призведе до помилки
 
 
 Если в проекте уже есть блокирующие операции (ввода-вывода) и их нужно адаптировать, использовать в асинхронном коде asyncio - придется использовать механизм многопоточности
