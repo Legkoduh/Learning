@@ -307,7 +307,9 @@ assert checkbox1.get_attribute('checked') == 'true'
 Второй - при помощи метода is_selected
 print(checkbox1.is_selected()) # True - чекбокс выбран
 print(checkbox1.is_selected()) # False - чекбокс не активен
-Когда в HTML разметке чекбокс перекрыт другими эелементами (svg, картинки и тп) и нет возможности на него кликнуть - нужно использовать один элемент для клика, а сам input с типом checkbox для проверки на аттрибут checked
+Element click intercepted - ошибка когда элемент в HTML разметке перекрыт другими эелементами (svg, картинками, блоками и тд) и нет возможности на него кликнуть
+В таком случае нужно использовать один элемент для клика, а сам input с типом checkbox, для проверки на аттрибут checked
+Веб-элемент для клика нужно брать тот, по которому возможен клик, он не перекрыт другими элементами и находится на самом верху
 CHECKBOX_1 = ('xpath', "//label[@for='tree-node-home']") # Элемент для клика
 CHECK_STATUS = ('xpath', "//input[@id='tree-node-home']") # Сам чекбокс для проверки его аттрибута checked после клика
 checkbox1 = driver.find_element(*CHECKBOX_1)
@@ -324,3 +326,34 @@ checkbox1.click()
 checkbox1_class_active = checkbox1.get_attribute('class')
 print(checkbox1_class_active) # mt-2 list-group-item active list-group-item-action - class элемента изменился после клика на него
 assert 'active' in checkbox1_class_active
+
+Radio-button создается так же при помощи input-поля и поэтому, взаимодействие с ним происходит так же через клик
+Отличием от чекбокса является то, что в одной форме можно выбрать только одну радио-кнопку, а чекбоксов можно выбрать несколько
+Если радио-кнопка перекрыта другими элементами и клик на ее input не возможет, применяется тот же способ что и для чекбоксов - один элемент для клика, а сам input с типом radio, для проверки на то, отмечен ли он (is_selected)
+YES_RADIO = ('xpath', "(//label[@class='custom-control-label'])[1]")
+YES_RADIO_STATUS = ('xpath', "//input[@id='yesRadio']")
+yes_radio = driver.find_element(*YES_RADIO)
+yes_radio.click()
+assert driver.find_element(*YES_RADIO_STATUS).is_selected() is True
+
+is_enabled - проверить, не находится ли чекбокс, радио/обычная кнопка в статусе disabled
+print(yes_radio.is_enabled())
+
+Proxy-server - это посредник между ПК пользователя (или локальной сетью) и интернетом
+Используя прокси, весь трафик проходит через этот сервер, прежде чем достигает назначения и обратно
+Прокси может скрывать IP-адресс, обходить блокировки и другое
+Прокси сервер добавляется в Селениум при помощи Опций браузера
+from selenium.webdriver.chrome.options import Options
+PROXY_SERVER = "172.104.209.44:1080"
+options = Options()
+options.add_argument(f"proxy-server={PROXY_SERVER}")
+driver = webdriver.Chrome(service=service, options=options)
+driver.get('https://whatismyipaddress.com/') # Проверить, изменился ли IP-address и мето нахождения
+Если для Прокси сервера нужен логин и пароль - его нужно указать перед его адрессом PROXY_SERVER = "username:password@172.104.209.44:1080"
+
+Если для тестов нужны несколько разных пользователей - можно создать несколько обьектов driver, все они будут независимыми и не будут влиять друг на друга
+from selenium import webdriver
+driver1 = webdriver.Chrome()
+driver1.get('https://www.motor1.com/')
+driver2 = webdriver.Chrome()
+driver2.get('https://www.motor1.com/')
