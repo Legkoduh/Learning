@@ -374,3 +374,159 @@ switch_to.new_window('tab') - открывает новую вкладку и а
 switch_to.new_window('window') - открывает новое окно и сразу переключет фокус Селениум на него
 driver.switch_to.new_window("tab")
 driver.get('https://www.autosport.com/') # Ссылка будет открыта в новой вкладке и фокус Селениум будет на ней, в ней сразу можно будет работать
+
+Select - это поле, клик на которое открывает дроп-даун список, из которого можно выбрать айтем
+Селекты могут быть реализованы двумя способами:
+1. при помощи тега select, а айтемы в списке - при помощи тега option - старая реализация
+2. через тег div и input внутри него - современная реализация
+
+1. Для работы с Селектами такого типа, нужно импортировать класс Select и создать его обьект. Этот обьект и будет дроп-даун списком
+Создание обьекта класса Select нужно для того, что б можно было работать с его айтемами - option
+from selenium.webdriver.support.select import Select
+SELECT_LOCATOR = ('xpath', "(//select[@class='ms-result-table-grouping-header__select text-body font-bold uppercase ms-native-select__select'])[2]")
+DROP_DOWN = Select(driver.find_element(*SELECT_LOCATOR))
+Обьекту класса Select доступны все методы веб-элемента Селект
+Взаимодействовать с элементами Селекта можно тремя способами:
+select_by_visible_text - через текст
+select_by_value - значение (value)
+select_by_index - индекс
+
+options - возвращает список всех айтемов/опций в Селекте
+Перебор всех опций Селекта можно осуществить при помощи цикла for
+Перебор по тексту опций
+drop_down_options = DROP_DOWN.options
+for o in drop_down_options:
+    # DROP_DOWN.select_by_visible_text(o.text.title()) # Если стиль текста преобразуется на фронте
+    DROP_DOWN.select_by_visible_text(o.text) # Каждая опция Селекта будет выбрана в нем
+По индексу
+for o in range(len(drop_down_options)):
+    DROP_DOWN.select_by_index(o)
+По значению аттрибута value
+for o in drop_down_options:
+    DROP_DOWN.select_by_value(o.get_attribute("value"))
+
+Модуль Keys используется для иммитации нажатия на кнопки клавиатуры
+Ему доступны все кнопки на клавиатуре и их сочетания (ctrl + c, ctrl + v и тд)
+from selenium.webdriver import Keys
+driver.get("https://the-internet.herokuapp.com/key_presses")
+input_field = driver.find_element('xpath', "//input[@id='target']")
+input_field.send_keys(Keys.F2)
+time.sleep(2)
+input_field.send_keys(Keys.CONTROL + "V")
+time.sleep(2)
+
+Keys.TAB - так же используется для автоматического завершения части введенного слова
+driver.get("https://demoqa.com/select-menu")
+multi_select = driver.find_element('xpath', "//input[@id='react-select-4-input']")
+multi_select.send_keys("Gre")
+time.sleep(2)
+multi_select.send_keys(Keys.TAB) # Из дроп-даун списка выберет айтем с текстом Green
+time.sleep(2)
+
+2. Современные Селекты реализованы при помощи div и input внутри него
+Поэтому работать с ними можно двумя способами:
+1. как с input и send_keys для него
+2. как с div
+В качестве аргумента в send_keys - передать айтем из дроп-даун списка и нажать Enter для его выбора
+driver.get("https://demoqa.com/select-menu")
+drop_down = driver.find_element('xpath', "//input[@id='react-select-3-input']")
+drop_down.send_keys("Mr.")
+time.sleep(4)
+drop_down.send_keys(Keys.ENTER)
+time.sleep(4)
+
+Список дроп-даунов закрывается если с него убрать фокус курсора
+Что бы исчезающие элементы не пропадали и были доступны для испектирования - можно использовать функцию setTimeout в Консоли - setTimeout(function() { debugger; }, 5000)
+Этот код запускает режим Дебагера и останавливает выполнение JS кода на странице через 5 секунд
+Если работать с дроп-даунами как с тегом div, тогда клик нужно делать на нужный div и в появившемся списке кликать на нужный элемент
+driver.get("https://demoqa.com/select-menu")
+drop_down_btn = driver.find_element('xpath', "(//div[@class='col-md-6 col-sm-12'])[4]")
+drop_down_btn.click()
+time.sleep(2)
+item = driver.find_element('xpath', "//div[@class=' css-1s9izoc']/div/div[2]") # //div[text()='Mr.']
+item.click()
+time.sleep(2)
+
+Тег iframe - позволяет встраивать HTML страницу в другую HTML страницу
+На одной странице может быть несколько айфреймов, поэтому, для работы с элементами iframe - ВебДрайверу нужно явно указать, с какой именно страницей ему работать
+Без явного указания ВебДрайвер не найдет элементы внутри айфреймов
+switch_to.frame - метод для переключения в Айфрем
+Переключится в Айфрейм можно при помощи:
+1. самого веб-элемента Айфрейм
+IFRAME = ('xpath', "//iframe[@id='sp_message_iframe_1274672']")
+# iframe = wait.until(expected_conditions.visibility_of_element_located(IFRAME)) # Если Айфрейм появляется не сразу
+iframe = driver.find_element(*IFRAME)
+driver.switch_to.frame(iframe)
+2. значения его тега id
+driver.switch_to.frame('sp_message_iframe_1274672')
+3. значения его тега name
+4. индекса
+driver.switch_to.frame(0) # Переключится в первый по очереди Айфрейм на странице
+Что бы после переключения в Айфрейм дальше работать с элементами основной страницы - нужно явно переключится на нее
+switch_to.default_content - переключение на основную страницу
+Если нужный Айфрейм находится внутри других Айфреймов - нужно переключатся в них в порядке очереди, от внешнего к нужному внутреннему
+driver.get('https://demoqa.com/nestedframes')
+driver.switch_to.frame('frame1')
+text1 = driver.find_element('xpath', "//body").text
+print(text1) # Parent frame
+driver.switch_to.frame(0)
+text2 = driver.find_element('xpath', "//body").text
+print(text2) # Child Iframe
+Если после работы с Айфреймом, который находится внутри другого Айфрейма, нужно вернутся во внешний - это можно сделать при помощи switch_to.parent_frame
+driver.switch_to.parent_frame()
+print(driver.find_element('xpath', '//body').text) # Parent frame - ВебДрайвер вернулся во внешний Айфрейм
+
+Такие действия как: двойной клик, клик правой кнопкой мыши, ховер, перетаскивание элементов и другие не входят в базовый набор функций Селениум
+Для них существует отдельный API - action chains (цепочки действий)
+Его нужно импортировать в модуль и создать его обьект. В качестве аргумента, при создании обьекта, нужно передать созданный ранее driver
+from selenium.webdriver.common.action_chains import ActionChains
+driver = webdriver.Chrome()
+action = ActionChains(driver)
+Обьекту action доступны такие методы как:
+double_click - двойной клик
+click - клик левой кнопкой мыши
+context_click - клик правой кнопкой мыши (открывает контекстное меню)
+move_to_element - ховер на элемент
+pause - пауза на определенное количество секунд, которое передается как аргумент
+Все эти методы, в качестве аргумента, принимают веб-элемент, над которым нужно совершить действие
+Каждая цепочка действий имеет свое начало - первое действие и должна заканчиватся методом perform() - который обозначает ее завершение и запускает всю цепочку
+driver.get('https://testkru.com/Elements/Buttons')
+HOVER_BTN = ('xpath', "//button[@name='colorChangeOnHover']")
+action.move_to_element(driver.find_element(*HOVER_BTN)).perform() # move_to_element - начало цепочки действий, а perform - ее завершение
+Цепочка действий может содержать несколько действий
+double_click_btn = driver.find_element(*DOUBLE_CLICK_BTN)
+right_click_btn = driver.find_element(*RIGHT_CLICK_BTN)
+left_click_btn = driver.find_element(*LEFT_CLICK_BTN)
+hover_btn = driver.find_element(*HOVER_BTN)
+action.double_click(double_click_btn).context_click(right_click_btn).click(left_click_btn).move_to_element(hover_btn).perform() # 4 действия в одной цепочке
+Если цепочка действий получилась довольно длинной, для лучшей читаемости, ее можно разделить на несколько строк. Сделать это можно двумя способами:
+1. обернуть ее всю в круглые скобки и разделить пробелами
+(action.move_to_element(rally_category).
+pause(2).
+move_to_element(serie_in_rally).
+perform())
+2. при помощи обратного слеша и пробела
+action.move_to_element(rally_category).\
+ pause(2).\
+ move_to_element(serie_in_rally).\
+ perform()
+
+Есть 2 способа работы с drag-and-drop
+Первый - drag_and_drop метод цепочки действий
+Он принимает 2 веб-элемента, в качестве аргументов: source - какой блок перетягивать, target - куда перетягивать
+BLOCK_A = ('xpath', "//div[@id='column-a']")
+BLOCK_B = ('xpath', "//div[@id='column-b']")
+driver.get('https://the-internet.herokuapp.com/drag_and_drop')
+action.drag_and_drop(driver.find_element(*BLOCK_A), driver.find_element(*BLOCK_B)).perform()
+print(driver.find_element('xpath', "//div[@id='column-a']/header").text)
+Но этот способ не всегда подходит. Например, когда блок, в который нужно перетянуть, отображается не сразу, а с небольшой задержкой
+Второй - при помощи методов click_and_hold - который берет элемент который нужно перетащить, move_to_element - куда нужно перетащить и release
+release - отпускает зажатую кнопку мыши
+driver.get('https://tympanus.net/Development/DragDropInteractions/sidebar.html')
+DRAG_BLOCK = ('xpath', "//div[@class='grid__item'][2]")
+DROP_BLOCK = ('xpath', "//div[@class='drop-area__item'][2]")
+action.click_and_hold(driver.find_element(*DRAG_BLOCK)).pause(1.5).move_to_element(driver.find_element(*DROP_BLOCK)).release().perform()
+changes = driver.find_element('xpath', "//div[@id='drop-area']//div[2]").get_attribute('class')
+time.sleep(2)
+print(changes)
+assert "drop-area__item drop-feedback" == changes
