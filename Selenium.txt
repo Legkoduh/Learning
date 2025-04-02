@@ -530,3 +530,52 @@ changes = driver.find_element('xpath', "//div[@id='drop-area']//div[2]").get_att
 time.sleep(2)
 print(changes)
 assert "drop-area__item drop-feedback" == changes
+
+execute_script - позволяет выполнять JS код на странице
+driver.execute_script("alert('Hi')")
+
+Скрол на странице можно реализовать 2 способами:
+1. scroll_to_element метод цепочки действий
+driver.get('https://seiyria.com/bootstrap-slider/')
+EXAMPLE2 = ('xpath', "//h3[text()='Example 2: ']")
+action.scroll_to_element(driver.find_element(*EXAMPLE2)).perform()
+2. при помощи Javascript (метода window.scrollTo), кастомного класса и методов которые его используют
+class Scrolls:
+    def __init__(self, driver, action):
+        self.driver = driver
+        self.action = action
+
+    def scroll_by(self, x, y):
+        self.driver.execute_script(f"window.scrollTo({x}, {y})")
+
+    def scroll_to_bottom(self):
+        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")
+
+    def scroll_to_top(self):
+        self.driver.execute_script("window.scrollTo(0, 0)")
+
+    def scroll_to_element(self, element):
+        self.action.scroll_to_element(element).perform()
+        self.driver.execute_script("""window.scrollTo({top: window.scrollY + 700,});""")
+
+Плавный скролл вниз, вверх, к элементу
+class Scrolls:
+    def __init__(self, driver, action):
+        self.driver = driver
+        self.action = action
+
+    def scroll_to_top(self):
+        self.driver.execute_script("window.scrollTo({top: 0, behavior: 'smooth'});")
+    
+    def scroll_to_bottom(self):
+        self.driver.execute_script("window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});")
+
+    def scroll_to_elem_with_offset_down(self, elem):
+        self.action.scroll_to_element(elem).perform()
+        # time.sleep(4) # Just to check
+        self.driver.execute_script("window.scrollTo({top: window.scrollY + 700, behavior: 'smooth'});")
+
+# The x can always be 0, to scroll up and down
+    def scroll_to_coord(self, x, y):
+        self.driver.execute_script(f"window.scrollTo({x}, {y});")
+
