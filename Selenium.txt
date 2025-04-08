@@ -592,6 +592,21 @@ driver.get('https://www.motorsport.com/')
 Для прохождения базовой авторизации на сайте имя и пароль указывается в ссылке, на которую нужно перейти - https://username:password@domain/path
 driver.get('https://m:m@www.s.motorsport.com')
 
+Эмулировать поведение телефона можна используя Опции и add_experimental_option
+В add_experimental_option нужно передать строку "mobileEmulation" и словарь с нужными параметрами
+mobile_emulation = {"deviceName": "iPhone X"} # Эмулирует Айфон Х
+options.add_experimental_option("mobileEmulation", mobile_emulation)
+Эмулировать можно стандартные телефоны для браузера. Для Хром это: iPhone X, iPhone 6, Nexus 5, Nexus 6P, Samsung Galaxy S5, Galaxy Note 3
+Если нужного телефона нет в списке стандартных для браузера или нужны кастомные настройки, можно использовать deviceMetrics в mobile_emulation словаре
+mobile_emulation = {
+    "deviceMetrics": {
+        "width": 360,   # Ширина экрана
+        "height": 640,  # Высота экрана
+        "pixelRatio": 3.0  # Плотность пикселей
+    },
+    "userAgent": "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5 Build/MOB30V) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36"
+}
+
 
 1. Создание нового проекта
 2. Кнопки браузера (вперед, назад...)
@@ -613,7 +628,7 @@ driver.get('https://m:m@www.s.motorsport.com')
 17. Proxy server
 18. Для иммитации 2х пользователей - 2 разных драйвера
 19. Переключение между вкладками, открытие новой вкладки, окна
-20. Select 2х типов
+20. Select 2х типов (drop-down)
 21. Модуль Keys
 22. iframe
 23. Цепочка действий
