@@ -26,6 +26,7 @@ bash - source venv/bin/activate
 После этого, в терминале, в начале строки, появится (venv), это будет означать, что окружение активировано
 3. Далее нужно установить Selenium и WebDriver manager: pip3 install selenium webdriver-manager
 Webdriver manager позволяет автоматически скачивать и устанавливать самую новую версию Драйвера для того или иного браузера без скачивания и замены бинарных файлов в проектах
+Просмотреть все загруженные и установленные пакеты можно в File > Settings > Project: {project_name} > Python Interpreter
 После этого можно создать новый Пайтон файл для написания кода
 В него нужно импортировать Вебдрайвер
 from selenium import webdriver
