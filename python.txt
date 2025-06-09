@@ -4453,7 +4453,7 @@ while True:
         c += 1
     except StopIteration:
         print('\n→ Generator finished (StopIteration)')
-        break # Цикл for завершается
+        break # Цикл for завершается и строки кода идущие после слова break не будут выполнены
 
 Функции list, set, sum, max, min и другие могут напрямую работать с итераторами и генераторами
 a = (x for x in range(5)) # Создан генератор
