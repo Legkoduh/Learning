@@ -4435,6 +4435,13 @@ for v in gen_f():
 
 Вывода с = 5 не будет, так как цикл for вызывает функцию next под капотом и если она возвращает StopIteration - он завершает свое выполнение не достигнув следющих строк - print('c =',c)
 Как for работает "вручную", с явными вызовами next(), включая финальный StopIteration:
+def gen_f():
+    print('fn')
+    for i in range(5):
+        print('yielding', i)
+        yield i
+    print('after fn')
+
 g = gen_f()  # Создаём генератор
 c = 0
 
