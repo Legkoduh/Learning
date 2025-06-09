@@ -4434,6 +4434,7 @@ for v in gen_f():
     print(v)
 
 Вывода с = 5 не будет, так как цикл for вызывает функцию next под капотом и если она возвращает StopIteration - он завершает свое выполнение не достигнув следющих строк - print('c =',c)
+В Python цикл for внутри устроен как while + next() + try/except StopIteration
 Как for работает "вручную", с явными вызовами next(), включая финальный StopIteration:
 def gen_f():
     print('fn')
@@ -4448,7 +4449,7 @@ c = 0
 while True:
     try:
         print(f"\nStep {c}: calling next(g)")
-        v = next(g)  # как for делает под капотом
+        v = next(g)  # Как for делает под капотом
         print('→ got:', v)
         c += 1
     except StopIteration:
