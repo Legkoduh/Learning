@@ -104,6 +104,15 @@ git checkout first_branch (branch name) - переключится в ветку
 git checkout - - перейти в предыдущую ветку (на 1 шаг назад)
 Если пушить изменения в репозиторий, в котором еще нет новой, созданной на локальной машине ветки - возникает ошибка
 git push -u origin first_branch (name of the local branch) - создать новую локальную ветку в удаленном репозитории и связать их
+
+git remote add origin https://github.com/твой_ник/имя_репозитория.git - связать локальный репозиторий с удалённым
+origin — это имя удалённого репозитория (может быть любое, но по умолчанию обычно origin)
+URL — адрес репозитория на GitHub
+git push -u origin main
+-u — устанавливает ветку main как upstream (будет пушить/тянуть по умолчанию)
+origin — имя удалённого репозитория
+main — имя ветки (раньше часто была master, сейчас чаще main)
+
 Для мерджа необходимо переключится в ту ветку, в которую нужно сделать мердж
 git merge new_branch (name of the branch) - мердж new_branch ветки в актуальную, где сейчас находитесь, ветку
 Мерж new_branch ветки в best_branch ветку:
@@ -177,7 +186,7 @@ git push
 
 ------------------------- git GUI -------------------------
 git GUI & - launch git GUI
-gitk & - the history of all action with the repository (Visualize master's history)
+gitk & - the history of all actions with the repository (Visualize master's history)
 
 
 Use case:
