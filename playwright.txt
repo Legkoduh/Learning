@@ -1,0 +1,492 @@
+Установить Playwright с помощью менеджера пакетов pip - pip install playwright
+Pytest - pip install pytest
+Плагин Pytest - pip install pytest-playwright
+Так же, установить Playwright можно с помощью PyCharm:
+File -> Settings -> Project: <project name>  -> Python Interpreter
+Выбрать нужный пакет и кликнуть на + (Install)
+После установки пакета playwright  установите необходимые браузеры с помощью команды в терминале - playwright install
+Playwright загружает браузеры Chromium, WebKit и Firefox в папки кеша ОС:
+%USERPROFILE%\AppData\Local\ms-playwright\ в Windows
+C:\Users\Kirilo\AppData\Local\ms-playwright\
+~/Library/Caches/ms-playwright на MacOS
+~/.cache/ms-playwright в Linux
+Чтобы установить не 3 браузера, а конкретный - передайте его в качестве аргумента во время установки
+playwright install chromium ?
+playwright install chrome ?
+
+Playwright предоставляет удобный официальный плагин pytest-playwright
+Он реализует несколько фикстур
+Наиболее широко используемой из которых является фикстура - "page", которая:
+автоматически создаёт браузер, контекст и страницу для запуска теста и функции для работы с ней
+автоматически закрывает их
+даёт дополнительные возможности: --browser, --headed, --tracing, --video, и т.п.
+Без использования фикстуры page, нужно создавать свою собственную, которая делает тоже самое
+@pytest.fixture
+def browser_fixture():
+    with sync_playwright() as playwright:
+        browser = playwright.chromium.launch(headless=False)
+        context = browser.new_context()
+        page = context.new_page()
+        yield page
+        page.close()
+        browser.close()
+
+def test_add_todo(my_fixture):
+    pass
+
+Используя встроенную в pytest-playwright фикстуру page, этот код можно существенно сократить
+def test_add_todo(page): # Фикстура page передается как аргумент в тестовую функцию, создает browser, context, page и методы для работы с ней
+    page.goto("https://demo.playwright.dev/todomvc/#/")
+    page.get_by_placeholder("What needs to be done?").click()
+    page.get_by_placeholder("What needs to be done?").fill("Создать первый сценарий playwright")
+    page.get_by_placeholder("What needs to be done?").press("Enter")
+
+По умолчанию pytest-playwright делает браузер headless (безголовым), тоесть выполнение тестов происходит "под капотом"
+Что бы выполнить тест в режиме headed - нужно передать параметр --headed при запусте тестов - pytest --headed
+
+Если для выполнения теста требуются особые параметры контекста браузера (геолокация, размер браузера, куки, user-agent и тд) - их можно задавать
+В Selenium это делается через Options
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+
+options = Options()
+options.add_argument("--window-size=1280,720")
+driver = webdriver.Chrome(options=options)
+
+В playwright, если установлен плагин pytest-playwright, это делается через его встроенную фикстуру browser_context_args, в conftest.py файле, который служит для конфигурирования pytest
+Фикстура browser_context_args возвращает словарь со значениями и устанавливает эти значения в класс browser_context
+@pytest.fixture
+def browser_context_args(browser_context_args):
+    return {
+        **browser_context_args,
+        "viewport": {"width": 1280, "height": 720},
+        "user_agent": "my-custom-agent",
+        "storage_state": "state.json",  # Можно подгрузить куки и localStorage
+    }
+
+@pytest.fixture(scope="session")
+def browser_context_args(browser_context_args):
+    return {
+        **browser_context_args,
+        "storage_state": {
+            "cookies": [
+                {
+                    "name": "stepik",
+                    "value": "sd4fFfv!x_cfcstepik",
+                    "url": "https://example.com"  # Замените на нужный URL
+                },
+            ]
+        }
+    }
+Примеры доступных параметров контекста можно найти тут https://playwright.dev/python/docs/test-runners
+
+Если этот плагин не установлен, нужные параметры можно передать в контекст при его создании
+from playwright.sync_api import sync_playwright
+
+with sync_playwright() as p:
+    browser = p.chromium.launch()
+    context = browser.new_context(
+        viewport={"width": 1280, "height": 720},
+        user_agent="my-custom-agent"
+    )
+    page = context.new_page()
+
+
+Playwright Codegen используют в качестве черновика для быстрого создания прототипа/шаблона, который можно доработать
+Запускается он в Терминале при помощи команды, синтаксис которой выглядит так - playwright {параметры} {ссылка}, где параметры - не обязательны
+playwright codegen demo.playwright.dev/todomvc/#/
+Это команда откроет два окна:
+браузер Chromium - в котором нужно выполнять действия по сценарию тестирования
+Playwright Inspector - в котором каждое действие будет записано в виде соответствующей строки кода
+Далее вы можете выполнить необходимое действие по сценарию в браузере, а codegen запишет и сгенерирует код для выполняемого вами действия
+
+Для доступа ко всем методам и классам playwright - его нужно импортировать в модуль
+from playwright.sync_api import Playwright, sync_playwright, expect
+browser = playwright.chromium.launch(headless=False) - запуск браузера chromium
+headless=False - дает команду, чтобы браузер chromium отображался и был видимым при запуске кода
+Если установить True, то браузер не будет отображаться, но при этом все записанные в коде действия сценария будут выполнены
+context = browser.new_context() - создает новый изолированный сеанс браузера
+page = context.new_page() - открывает новую страницу (таб) в браузере
+page.goto("ссылка") - открывает сайт, ссылка на который передана как аргумент
+page.click() - клик левой кнопкой мыши
+page.fill("Hi") - вводит значения, переданные ему в качестве аргумента в веб-элемент
+page.press("Enter") - нажатие на кнопку Enter на клавиатуре
+
+Так же, команда playwright codegen может содержать параметры, которые указываются перед ссылкой
+Узнать доступные опции и краткое их описание можно, выполнив команду - playwright codegen --help
+playwright codegen --viewport-size=800,600 https://www.motorsport.com/ - указать размер открываемого окна браузера
+playwright codegen -o codegen_code.py https://www.motorsport.com/ - файл, в который будет записан сгенерированный код (или --output)
+
+Playwright работает с тремя различными слоями, которые строятся друг на друге:  Browser, Context и Page.
+Browser - для работы каждой версии playwright требуются определенные версии браузеров
+С каждой новым выпуском, Playwright обновляет версии браузеров которые он поддерживает
+Это означает, что при каждом обновлении Playwright вам, возможно придется заново запускать команду  playwright install
+В отличие от Selenium, Playwright не использует webdriver
+Для Google Chrome, Microsoft Edge и других браузеров на базе Chromium по умолчанию Playwright использует сборки Chromium с открытым исходным кодом
+
+BrowserContext - playwright использует контексты браузера для достижения изоляции тестов
+Контекстом можно назвать независимую сессию браузера, схожую с режимом инкогнито
+Страницы в двух отдельных контекстах не имеют общих cookie, настроек профиля
+Для получения чистой среды тест может просто открыть новый контекст. Как правило, каждый тест имеет свой собственный контекст
+По сравнению с Selenium, контексты не требуют собственного процесса браузера
+
+Page - содержит содержимое загружаемого сайта. Используется для навигации по URL-адресам и взаимодействия с содержимым страниц
+Каждый контекст может иметь несколько страниц
+
+CLI - интерфейс командной строки (англ. Command Line Interface, CLI)
+Передавая различные параметры в командной строке, вы можете менять поведение в работе playwright
+--headed - по умолчанию Playwright запускает браузеры в безголовом режиме (headless)
+--browser - запустить тесты в нужном браузере, можно повторять, если браузеров несколько
+pytest --browser webkit --browser firefox
+--browser-channel - запустить тесты на браузерах Chrome и Edge установленных на ПК
+pytest --browser-channel=msedge
+--slowmo - замедлить выполнение тестов на указанное количество времени в милисекундах
+--device - имитация поведения браузера для определенного устройства
+--device="iPhone 15 Pro Max"
+Список всех поддерживаемых устройств - https://github.com/microsoft/playwright/blob/main/packages/playwright-core/src/server/deviceDescriptorsSource.json
+--output - каталог для артефактов, создаваемых тестами, название по-умолчанию - test-results
+--tracing - записывать ли трассировку для каждого теста: on, off или retain-on-failure (по-умолчанию - off)
+pytest --tracing=on
+--screenshot - делать ли скриншот после каждого теста: on, off или retain-on-failure (по-умолчанию - off)
+--video - записывать ли видео для каждого теста: on, off или retain-on-failure (по-умолчанию - off)
+--full-page-screenshot - делать ли скриншот всей страницы при ошибке
+По умолчанию снимается только область просмотра. Требуется, чтобы параметр --screenshot был включен (по умолчанию: off)
+
+Кроме CLI, на выполнение теста можно влиять с помощью маркеров pytest
+@pytest.mark.skip_browser("firefox") - пропустить тест браузером
+def test_visit_example(page):
+    page.goto("https://example.com")
+
+@pytest.mark.only_browser("chromium") - запуск теста в определенном браузере
+def test_visit_example(page):
+    page.goto("https://example.com")
+
+
+Веб-элемент - представляет собой DOM объекты, находящиеся на веб странице
+Селектор - это строка, адресс веб-элемента нужный для того, что б его найти
+Сам селектор не умеет искать веб-элементы - это просто строка, адресс
+".ms-desktop-menu__item.ws:visible"
+"//div[@class='menu-item']"
+"text=Login"
+Поиск веб-элементов осуществляет локатор
+ - объект, который Playwright создаёт на основе селектора
+Локатор это "умный указатель", который умеет искать элементы по селектору и взаимодействовать с ними
+menu_buttons = page.locator(".ms-desktop-menu__item.ws:visible")
+Он имеет методы для интеракции: .click(), .fill(), .nth(), .count(), .all() и т.д
+Может указывать на один или несколько элементов, если они имеют одинаковый селектор (адресс)
+В основном для поиска используют XPath-локаторы и CSS-селекторы
+Для того чтобы использовать селекторы  CSS и XPath в Рlaywright, реализован метод - page.locator(selector, **kwargs)
+Чтобы явно указать передаваемый тип локатора, необходимо указать префикс
+css= - если используется css селектор
+xpath= -  в случае если передается xpath селектор
+page.locator("css=button").click() # CSS
+page.locator("xpath=//button").click() # Xpath
+
+Селекторы по аттрибуту ID/идентификатору
+Этот селектор выбирает элементы, основываясь на названии их атрибута id
+Синтаксис для CSS требует использования символа # - #ИмяИдентификатора
+page.locator("#new-todo")
+Для Xpath - [@id='ИмяИдентификатора']
+page.locator("//*[@id="new-todo"]")
+
+Селекторы по аттрибуту class
+Этот селектор выбирает элементы, основываясь на значении их атрибута class
+Чтобы выбрать элемент с определённым классом с помощью css, нужно добавить точку перед его названием - .main-class
+CSS - page.locator(".class-name")
+XPath - page.locator("//*[@class='class-name']")
+Для поиска веб-элементов можно использовать несколько классов одновременно, обьединяя их точкой
+page.locator("css='.parent-class.child-class") # Перечисляя классы через точку
+page.locator("xpath=//div[contains(@class, 'parent-class) and contains(@class, 'child-class)]") # Используя метод contains(@аттрибут, его значение) и оператор and
+
+Селекторы по аттрибуту
+CSS синтаксис:
+[attr] поиск по аттрибуту независимо от его значения
+page.locator("[placeholder]")
+[attr='attr_value'] - поиск по аттрибуту с указанным значением
+page.locator("[placeholder='email']")
+XPath:
+page.locator("//*[@placeholder]")
+page.locator("//*[@placeholder='email']")
+
+page.locator("#id_value")
+page.locator(".class_value")
+page.locator("[attr]")
+page.locator("[attr='attr_value']")
+page.locator("//*[@id='id_value']")
+page.locator("//*[@class='class_value']")
+page.locator("//*[@attr]")
+page.locator("//*[@attr='attr_value']")
+
+Значение аттрибута начинается с …
+
+ 
+[attribute^="val"]
+ - атрибут начинается с val
+Заканчивается на … [attribute$="val"] - атрибут заканчивается на val
+Содержит … (подстрока) [attribute*="val"] - атрибут содержит подстроку val
+
+Для достижения уникальности элемента селекторы лучше комбинировать: тег, класс, id, аттрибуты
+page.locator("input[placeholder='Your email address']").click()
+page.locator("//input[@placeholder='Your email address']").click()
+
+Комбинатор потомков объединяет два селектора таким образом, что элементы, соответствующие второму селектору, выбираются, если у них есть предки (родитель, родитель родителя, родитель родителя родителя и т.д.), соответствующие первому селектору
+Этот комбинатор представлен символом пробела
+page.locator(".container p")
+Комбинатор детей - выбирает элементы, которые являются прямыми дочерними элементами другого элемента
+page.locator(".container > p")
+Цепочка локаторов (chaining) представлена 2 символами >> - сначала находит элементы по первому селектору,
+
+ потом среди них выберает что-то ещё
+page.locator(".ms-desktop-menu__item.ws >> nth=4").click()
+Находит все элементы, которые соответствуют .ms-desktop-menu__item.ws, а среди найденных выбирает пятый элемент (nth=4, индекс с 0)
+page.locator('div.wrapper >> text="Continue"') - находит все div.wrapper, а потом внутри ищет элемент с текстом "Continue"
+
+В ДевТулс можно использовать XPath и CSS для поиска веб-элементов
+div.ms-search-box > button
+//div[@class='ms-search-box']/button
+
+Псевдоклассы CSS в Playwright - это ключевое слово, добавленное к селектору, которое определяет его особое состояние
+Рlaywright дополняет работу с CSS  селекторами с помощью различных псевдоклассов
+Псевдоклассы CSS Playwright — дополнительный синтаксис, которого нет в CSS
+Стандартные псевдоклассы CSS (:hover, :nth-child(n)) работают и в Playwright, потому что он умеет использовать настоящие CSS-селекторы
+Псевдоклассы CSS в Playwright:
+1. :right-of(div > button) - cоответствует элементам, которые находятся справа от любого элемента, соответствующего внутреннему селектору, в любом положении по вертикали
+right-of - справа от, любой элемент справа от div > button
+page.locator("td:right-of(td p:text('Software engineer'))")
+2. :left-of(div > button) - соответствует элементам, которые находятся слева от любого элемента, соответствующего внутреннему селектору, в любой позиции по вертикали
+a:left-of(div > button) - любой тег а, который находится слева от div > button
+page.locator("td:left-of(td p:text('Software engineer'))")
+3. :above(div > button) - соответствует элементам, которые находятся над любым из элементов, соответствующих внутреннему селектору, в любом горизонтальном положении
+page.locator("td:above(td p:text('Consultant'))")
+4. :below(div > button) - соответствует элементам, которые находятся ниже любого из элементов, соответствующих внутреннему селектору, в любой позиции по горизонтали
+page.locator("td:below(td p:text('Consultant'))")
+5. :near(div > button) - подбирает элементы, которые находятся рядом (в пределах 50 CSS пикселей) с любым из элементов, соответствующих внутреннему селектору
+page.locator("td:near(td p:text('Consultant'))")
+Все псевдоклассы макета поддерживают необязательную опцию - максимальное расстояние в пикселях
+Например, button:near(:text("Username"), 120) соответствует кнопке, которая находится на расстоянии не более 120 пикселей от элемента с текстом "Username"
+page.locator("td:below(td p:text('Software engineer'), 100)")
+
+Локатор N-го элемента
+page.locator("button").locator("nth=0").click() # Первый элемент
+page.locator("button").locator("nth=-1").click() # Последний элемент
+page.locator(".ms-desktop-menu__item.ws >> nth=4").click() # 5-ый элемент (индексация начинается с 0)
+page.locator(".ms-desktop-menu__item.ws").nth(4).click() # 5-ый элемент
+li:nth-child(2) - выберет только тот li, который является 2-ым li в списке дочерних элементов у своего прямого родителя
+Проверяет позицию среди всех детей
+li:nth-of-type(2) - выберет 2-ой li, среди всех li прямого родителя
+Проверяет позицию только среди элементов такого же типа
+У :nth-of-type() и :nth-child() индекс начинается с 1
+<ul>
+  <li>Первый</li>
+  <div>Блок</div>
+  <li>Второй</li>
+</ul>
+li:nth-child(2) не сработает, потому что 2-й ребёнок — это <div>
+
+
+li:nth-of-type(2) выберет именно второй <li>
+
+Определение местоположения только видимых элементов
+:visible - псевдокласс в CSS-селекторах для выбора видимого элемента
+page.locator("button:visible").click()
+
+Определение по тексту
+:has-text() - псевдокласс  выбора элемента содержащего указанный текст
+page.locator('div:has-text("Card")').click()
+Обратите внимание, что псевдокласс :has-text() нужно обязательно использовать вместе с  css селектором, иначе Playwright будет искать  указанный текст по всему DOM
+
+Элементы, отвечающие одному из условий
+page.locator('button:has-text("Log in"), button:has-text("Sign in")').click() - нажимает на элемент с тегом <button>, которая содержит текст "Log in" или "Sign in"
+
+CSS селекторы
+page.locator(".btn")             # класс
+page.locator("#submit")          # id
+page.locator("input[name='q']")  # по атрибуту
+page.locator("[placeholder]")    # элемент с атрибутом
+
+Комбинированные селекторы
+page.locator("div.menu >> text='Profile'") # Сначала ищет div.menu, внутри – текст "Profile"
+
+Nth / Индексация
+page.locator(".item").nth(2)     # третий элемент (индексация с 0)
+page.locator(".item >> nth=2")   # то же самое
+
+CSS :nth-child / :nth-of-type
+page.locator("li:nth-child(2)")       # li, который 2-й ребёнок
+page.locator("li:nth-of-type(2)")     # 2-й li среди всех li
+
+Псевдоклассы и текст
+
+page.locator("button:has-text('Save')")
+page.locator("input:focus")
+page.locator("a:visible")
+
+Комбинирование
+page.locator("form >> input[name='email']").fill("test@mail.com")
+page.locator("ul.menu >> li >> nth=1").click()
+
+XPath (но Playwright рекомендует CSS)
+page.locator("//button[@type='submit']")
+
+Выбор внутри родителя
+
+page.locator(".card").locator("button:has-text('Edit')").click()
+
+
+Playwright умеет работать с такими классическими локаторами как CSS и XPath, через метод locator
+page.locator("xpath='//div[@class='main_class']'")
+page.locator("css='div.main_class'")
+Но начиная с версии Playwright 1.27,  в нем реализованы несколько встроенных локаторов, которые упрощают и организуют процесс локализации веб-элемента
+Для обеспечения стабильности своих тестов, создатели Playwright рекомендуют использовать именно локаторы get_by_*
+Поиск по:
+тексту - page.get_by_text(text, **kwargs) - page.get_by_text("switch checkbox").click()
+атрибуту title - page.get_by_title(text, **kwargs) - page.get_by_title("username").fill("Kirilo")
+плейсхолдеру - page.get_by_placeholder(text, **kwargs) - page.get_by_placeholder("password")
+тегу <lable> - page.get_by_label(text, **kwargs) - page.get_by_label("Email address").fill("qa@example.com")
+на основе data-testid - page.get_by_test_id(test_id) - page.get_by_test_id('todo-title').click()
+Поиск изображение на основе атрибута alt - page.get_by_alt_text(text, **kwargs) - page.get_but_alt_text("logo").click()
+
+Поиск элемента по роли ARIA - page.get_by_role(role, **kwargs)
+Локатор page.get_by_role(role, **kwargs) отражает то, как вспомогательные технологии(Скринридер (screen reader)) для людей с ограниченными возможностями, воспринимают страницу
+Роли ARIA добавляются в элементы HTML с помощью явного атрибута role="role type", где role type - это имя роли в спецификации ARIA
+Даже если атрибут role не указывается у веб-элемента, то все элементы имеют «неявную ARIA-семантику по умолчанию»
+Если у тега button нет явного указания его роли, то вы все равно можете использовать поиск веб-элемента по его роли использую следующую запись - page.get_by_role('button')
+Аналогичная запись сработает если веб элемент не имеет тег button, но ему явно указана роль кнопки
+При поиске по роли ARIA обычно следует также передавать доступное имя, чтобы локатор точно определил нужный элемент
+page.get_by_role("button", name="Submit").click()
+
+Локатор or_ - создает локатор, который соответствует любому из двух локаторов
+Используется для поиска элемента, который соответствует хотя бы одному из заданных селекторов
+selector = page.locator("input").or_(page.locator("textarea"))
+Локатор and_ - используется для поиска элемента, который соответствует всем заданным селекторам
+selector = page.get_by_role("button", name="Sing up").and_(page.get_by_title("Sing up today"))
+
+Цепочка локаторов
+Локаторы могут быть объединены в последовательность(цепь)  с помощью символа  >>
+При использовании такой формы записи, следующий селектор запрашивается относительно результата предыдущего
+page.locator("#navbarNavDropdown >> li:has-text('Company')").click()
+Другим вариантом использования цепочки локаторов является сохранение веб-элемента в переменную и обращение к локаторам с помощью этой переменной
+nav_bar = page.locator('div#navbarNavDropdown')
+nav_bar.locator("li:has-text('Company')").click()
+Фильтрация
+Для того чтобы помочь локализовать поиск,  реализован метод filter()
+Сузить поиск можно передав аргументом фильтр по тексту, по локатору или можно использовать оба способа фильтрации
+Функция filter()  принимает несколько аргументов:
+has
+has_not
+has_text
+has_not_text
+Для того чтобы отфильтровать элементы по тексту, нужно передать аргумент has_text=  и текст, который присутствует в элементе
+page.locator("li").filter(has_text='Company').click()
+Для того чтобы отфильтровать элементы по локатору, используйте аргумент has=
+page.locator('li').filter(has=page.locator('.dropdown-toggle')).click()
+Для поиска элементов, не соответствующих определенному локатору
+row_locator = page.locator("tr")
+row_locator.filter(has_not=page.get_by_role("button")).count()
+Если необходимы элементы которые не содержат определенный текст, в том числе  в дочернем элементе или элементе-потомке используется - has_not_text
+Поиск совпадений не чувствителен к регистру и ищет подстроку
+row_locator = page.locator("tr")
+row_locator.filter(has_not_text="helicopter")
+И все это можно комбинировать>>
+row_locator = page.locator("tr")
+row_locator
+    .filter(has_text="text in column 1")
+    .filter(has=page.get_by_role("button", name="column 2 button"))
+    .click()
+has_text и has_not_text - ищут среди всех элементов и их потомкой
+has и has_not - ищут только среди потомков предоставленных элементов и не проверяют сами элементы
+:not() - псевдокласс CSS, который позволяет исключить из самих элементов те, у которых есть указанный класс
+<div class="parent has-child">
+  <span class="child"></span>
+</div>
+<div class="parent"></div>
+page.locator(".parent").filter(has=page.locator(".child")) - вернет только первый div, так как только у него есть потомок с классом child
+page.locator(".parent").filter(has_not=page.locator(".child")) - вернет только второй div, потому что у него нет потомка с классом child
+page.locator(".parent:not(.child)") - вернет div среди классов которого нет child
+Если элемент имеет class="parent has-child" - он останется (нет класса child)
+
+Если имеет class="parent child" отфильтруется, потому что есть класс child
+
+menu_buttons = page.locator(".ms-desktop-menu__item.ws:visible") - возвращает Locator, который соответствует всем элементам на странице, подходящим под переданный селектор
+print(type(menu_buttons)) # <class 'playwright.sync_api._generated.Locator'>
+Даже если таких элементов несколько, locator не превращается в список, а остаётся единым объектом, который «указывает» на все найденные элементы
+print(menu_buttons) # <Locator frame=<Frame name= url='https://www.motorsport.com/'> selector='.ms-desktop-menu__item.ws:visible'>
+print(menu_buttons[1]) # TypeError: 'Locator' object is not subscriptable - это все еще обьект Locator, а не список локаторов
+Если необходимо узнать количество элементов, соответствующих указанному селектору - используйте метод count()
+menu_buttons.count() # 12
+Для того чтобы взаимодействовать с конкретным элементом из списка, используйте метод nth() с указанием индекса нужного вам элемента
+Указывается именно индекс, а не порядковый номер, по этому счет ведется с 0-го индекса. nth(0) - выбирет первый элемент
+page.get_by_role("listitem").nth(1) # Второй
+Методы locator.first, locator.last вернут первый и последний элемент из списка
+Для того чтобы пройтись по всем элементам можно использовать метод for вместе с range(), count(), для создания диапазона и nth() для перебора по локаторам
+menu_buttons = page.locator(".ms-desktop-menu__item.ws:visible")
+for number in range(menu_buttons.count()):
+    menu_buttons.nth(number).click()
+Начиная с версии playwright 1.29 появился специализированный метод locator.all() для перебора всех совпадающих элементов
+Если локатор находит несколько  элементов, метод locator.all() возвращает массив локаторов указывающих на соответствующие элементы
+print(type(menu_buttons.all())) # <class 'list'> - список
+print(menu_buttons.all()) # [<Locator frame=<Frame name= url='https://www.motorsport.com/'> selector='.ms-desktop-menu__item.ws:visible >> nth=0'>, <Locator frame=<Frame name= url='https://www.motorsport.com/'> selector='... ] - список локаторов
+for button in menu_buttons.all():
+    button.click()
+
+| Метод                    | Для каких элементов                              | Что делает                                    | Особенности                              |
+| ------------------------ | ------------------------------------------------ | --------------------------------------------- | ---------------------------------------- |
+| .click()                 | Любой кликабельный (button, link, checkbox, div) | Имитирует обычный клик мышью                  | Может включить **или** выключить чекбокс |
+| .check()                 | Только `checkbox` и `radio`                      | Устанавливает состояние **checked**           | Если уже checked > ничего не делает      |
+| .uncheck()               | Только `checkbox`                                | Устанавливает состояние **unchecked**         | Если уже unchecked > ничего не делает    |
+| .set_checked(True/False) | Только `checkbox`                                | Гибко: `True` > включить, `False` > выключить | Заменяет пару `.check()` + `.uncheck()`  |
+| .dblclick()              | Любой кликабельный                               | Двойной клик                                  | Можно указать задержку между кликами     |
+
+
+Действия с элементами
+Прежде чем предпринимать какие-либо действия с веб-элементами, Playwright выполняет широкий спектр проверок
+Он автоматически ждет, пока пройдут все соответствующие проверки, и переходит к следующему шагу
+Это происходит в течение заданного тайм-аута и завершается неудачей, если произошла ошибка проверки
+Проверка  элемента  включает:
+Attached - элемент присоединен к DOM. Элемент считается прикрепленным, если он подключен к DOM или ShadowRoot.
+Editable - элемент редактируемый. Элемент считается редактируемым, если он включен и у него не установлено свойство "read only".
+Enabled - элемент включен. Считается включенным, если у тегов button, select, input, textare не имеют свойства disabled.
+Receive Events - получает события, не заслоняемые другими элементами.
+Stable - элемент стабилен. Элемент считается стабильным, если он сохраняет ту же  область после двух или более последовательных кадров анимации.
+Visible -  элемент является видимым
+Каждое действие (click, tap, check, hover, fill, getAttribute, selectOption...) требует определенный набор проверок
+
+locator.click(**kwargs) - этот метод кликает на элемент, выполняя следующие действия:
+Ждет проверки элемента на возможность действия с ним (если не установлен параметр force)
+При необходимости сделает скролл до элемента, чтобы он стал видимым
+Ждет успешного или неудачного завершения инициированных навигаций, если не установлена ??опция noWaitAfter
+Данный метод принимает несколько аргументов, которые влияют на работу данного метода:
+click(button='right') - <"левая"|"правая"|"средняя"> По умолчанию
+сlick(force=True) - обходить проверки на возможность действия
+click(modifiers=["Shift"]) - клавиши-модификаторы, которые необходимо нажать
+
+dblclick() - двойной клик по элементу
+page.get_by_text("Копировать").dblclick()
+
+locator.fill(текст, **kwargs) - для ввода данных в поле ввода
+Этот метод ожидает готовности  элемента к  действию, фокусируется на элементе и заполняет его данными переданными в качестве аргумента
+Передаваемые данные заполняются сразу единым блоком, не важно сколько символов вы передали 5 или 100, в поле назначения все символы введутся сразу, одним действием
+
+В отличие от  fill() - метод type() передает данные посимвольно
+Фактически данный метод посылает события keydown, keypress/input и keyup для каждого символа в тексте
+Данный метод может пригодиться в случае тестирования полей ввода с автозаполнением
+
+locator.press(key, **kwargs) - для отправки функциональных клавиш:
+F1 - F12, Backspace, Tab, Delete, Escape, ArrowDown, End, Enter, Home, Insert, PageDown, PageUp, ArrowRight, ArrowUp и так далее
+
+keyboard.down() и keyboard.up() — для более точного контроля нажатия и отпускания клавиш, например:
+page.keyboard.down("Shift")
+page.keyboard.press("KeyA")
+page.keyboard.up("Shift") # сочетания клавиш Shift и a
+"KeyA" — это код клавиши клавиатуры в стандарте UI Events KeyboardEvent code values
+"KeyA" означает клавишу буквы A на клавиатуре, это именно физическая клавиша A, не символ 'a' или 'A'
+"Keya" — не сработает, потому что правильный код клавиши всегда в верхнем регистре: "KeyA", "KeyB", и т.д.
+
+
+
+
+
+
+Playwright поставляется со встроенными механизмами ожидания при взаимодействии со страницами
+Явное ожидание
+Если выполнение теста требует появления определенного элемента на странице - можно явно указать playwright дождаться элемента с помощью page.wait_for_selector()
