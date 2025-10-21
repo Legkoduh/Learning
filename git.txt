@@ -207,3 +207,16 @@ Use case:
 Отправить изменения с локальной машины в удаленный репозиторий - git push (and then - pass the verification with valid data)
 
 echo > main.py - add a new File using the Terminal
+
+Создание локального репозитория в PyCharm
+Version Control drop-down at the left top - Create Git Repository - идентично git init
+Создание удаленного репозитория в PyCharm
+Version Control drop-down at the left top - Share Project On
+
+Папка test содержит 2 файла: test1.py и test2.py
+git add test - добавит в index папку и оба файла
+git add test/test1.py - добавит только файл test1.py
+git rm --cached FileName - удалит файл из index
+git rm --cached test/test1.py
+Если папка test и хотя бы один файл в ней добавлены в index - для их удаления нужен дополнительный параметр -r
+git rm -r --cached test - удалит из индекса папку и все файлы добавленные в index
