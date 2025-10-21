@@ -251,3 +251,39 @@ git rm --cached FileName - удалит файл из index
 git rm --cached test/test1.py
 Если папка test и хотя бы один файл в ней добавлены в index - для их удаления нужен дополнительный параметр -r
 git rm -r --cached test - удалит из индекса папку и все файлы добавленные в index
+
+
+Запись [repository_name]/[branch_name] - это ссылка на удалённую ветку, локальная копия состояния ветки в удаленном репозитории (remote-tracking branch)
+origin/my_branch
+Git хранит её в локальном репозитории, для отслеживания удаленной ветки и она только для чтения
+Она отражает состояние, что находится в соответствующей ветка на GitHub или другом удалённом репозитории
+Нельзя напрямую коммитить в origin/my_branch, это только отражение удалённой ветки
+Где используется origin/my_branch:
+1. При просмотре веток
+git branch -a
+* my_branch
+  master
+  remotes/origin/master
+  remotes/origin/my_branch
+2. При переключении на удалённую ветку (read-only)
+git checkout origin/my_branch
+Это переходи в состояние “detached HEAD”, просто чтобы посмотреть, что в удалённой ветке, но коммитить туда нельзя
+3. При создании локальной ветки на основе удалённой
+git checkout -b my_branch origin/my_branch
+Эта команда создаёт новую локальную ветку my_branch, которая будет отслеживать удалённую origin/my_branch
+4. При слиянии, сравнении, логах
+git diff origin/my_branch
+git log origin/my_branch
+git merge origin/my_branch
+Так Git понимает, что имеется в виду “удалённая версия ветки my_branch”
+
+Они обновляются при git fetch origin
+Git:
+1. идёт на GitHub (или другой удалённый репозиторий);
+2. получает информацию о последних коммитах;
+3. обновляет твои локальные origin/master, origin/my_branch и т.д.
+Важно: при этом твоих локальных веток (master, my_branch) Git не трогает — он просто обновляет информацию о том, что происходит “на сервере”
+
+Не используется origin/my_branch в командах, где нужно указывать репозиторий и ветку отдельно, например:
+git push origin my_branch
+git pull origin my_branch
