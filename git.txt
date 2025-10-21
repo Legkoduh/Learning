@@ -208,10 +208,41 @@ Use case:
 
 echo > main.py - add a new File using the Terminal
 
+
 Создание локального репозитория в PyCharm
-Version Control drop-down at the left top - Create Git Repository - идентично git init
+Version Control drop-down at the left top - Create Git Repository
+Это идентично git init, которая используется для создания нового, пустого репозитория Git или для повторной инициализации существующего
+С помощью этой команды  Git создает скрытый каталог .git, который включает метаданные, такие как подкаталоги для объектов и файлы шаблонов, необходимые для создания нового репозитория Git
+В этом каталоге хранятся все объекты и ссылки, которые Git использует и создает как часть истории проекта
+Далее можно создать связь между локальным и удаленным репозиториями
+git remote - управляет набором удалённых репозиториев, которые вы связали с локальным репозиторием
+Основные возможности git remote:
+git remote add [repository_name] [repository_url] - связывает локальный репозиторий с удаленным репозиторием
+git remote -v - отображает список удаленных репозиториев , связанных с локальным репозиторием
+git remote remove [repository_name] - удалить связь с удаленным репозиторием
+repository_name - имя удаленного репозитория, по умолчанию - origin, но можно указать любое имя
+git remote add custom_repo_name https://github.com/L/test.git
+git add . - добавить все неотслеживаемые файлы в index
+git commit -m "Commit message" - создать коммит
+git push --set-upstream [repository_name] [current_branch_name]
+current_branch_name - имя локальной ветки в которой были сделаны изменения, по умолчанию master или main
+Если ветки с таким именем нет в удаленном репозитории - она будет там создана
+upstream — это связь, которая говорит Git, какую удалённую ветку использовать по умолчанию при git push и git pull
+git push --set-upstream custom_repo_name master - означает пуш локальной ветки master в репозиторий custom_repo_name в ветку master
+Если 2 разработчика назовут у себя удаленный репозиторий по разному, Git поймет, что им нужен один и тот же репозиторий благодаря ссылке, которую они указывают в git remote add
+Git не смотрит на имя удалённого репозитория, которое вы дали локально. Он ориентируется только на URL репозитория, который указан при git remote add
+
 Создание удаленного репозитория в PyCharm
-Version Control drop-down at the left top - Share Project On
+Version Control drop-down at the left top - Share Project On - выбрать нужную платформу (GitHub, GitLab и тд)
+В окне Share Project On:
+Repository name - имя удаленного репозитория, который будет создан на выбранной платформе
+Remote - имя локального репозитория
+PyCharm создаст репозиторий на GitHub с именем, которое ты указал в поле Repository name
+По умолчанию репозиторий может быть приватным, если так настроен GitHub. PyCharm учитывает настройки приватности аккаунта
+PyCharm создает и пушит только текущую локальную ветку, на которой ты находишься (например, master или main)
+Только для текущей ветки PyCharm автоматически устанавливает upstream на созданный удалённый репозиторий
+Остальные локальные ветки нужно пушить и создавать upstream самому
+
 
 Папка test содержит 2 файла: test1.py и test2.py
 git add test - добавит в index папку и оба файла
