@@ -42,6 +42,15 @@ git status - nothing to commit
 Для добавления файла в удаленный репозиторий - git push
 Открывается страница авторизации github, после успешного логина - все изменений (новые файлы, изменений в файлах) добавлены в удаленный репозиторий
 
+Один и тот же файл может быть
+Changes to be committed:
+        modified:   cases
+Changes not staged for commit:
+        modified:   cases
+Changes to be committed — это staged изменения, то есть уже добавленные в индекс (с помощью git add) и готовые к коммиту
+Changes not staged for commit — это новые изменения, которые появились после того, как файл был добавлен в индекс (git add)
+
+
 bash commands:
 cat js.txt (file name) - вывести содержимое файла в bash console
 
