@@ -49,6 +49,7 @@ Changes not staged for commit:
         modified:   cases
 Changes to be committed — это staged изменения, то есть уже добавленные в индекс (с помощью git add) и готовые к коммиту
 Changes not staged for commit — это новые изменения, которые появились после того, как файл был добавлен в индекс (git add)
+То есть файл cases в индексе есть одна версия, а в рабочем каталоге — ещё одна изменённая версия. Git показывает обе
 
 
 bash commands:
